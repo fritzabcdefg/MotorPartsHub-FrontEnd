@@ -33,7 +33,7 @@
         $('#admin-inventory').remove();
 
         const html = `
-            <section id="admin-inventory" class="card admin-section" style="display:block;">
+            <section id="admin-inventory" class="card admin-section" style="display:none;">
                 <h2>Inventory Management</h2>
                 <p class="muted">Create, edit, and soft-delete inventory items with pop-up forms.</p>
                 <div class="form-actions">

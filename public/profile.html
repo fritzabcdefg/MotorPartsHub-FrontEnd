@@ -1,22 +1,180 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Profile - MotorPartsHub</title>
+  <!-- Custom Midnight Violet Stylesheet -->
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
+
+  <!-- Global Navigation Injector -->
   <div id="header"></div>
-  <main class="card">
-    <h1>Your Profile</h1>
-    <div id="profileRoot"></div>
+
+  <!-- Primary Page Wrapper Layout -->
+  <main class="page-shell">
+    <div class="row">
+      
+      <!-- Left Column: User Account Banner Card -->
+      <section class="col col-md-4">
+        <div class="card text-center mb-4">
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <!-- Avatar Display Image -->
+            <img id="avatarPreview" src="/img/default-avatar.png" alt="Profile Avatar">
+            <h2 id="displayUserName" class="mb-2">Loading...</h2>
+            <p id="displayEmail" class="muted mb-4">...</p>
+          </div>
+          
+          <hr style="border-color: rgba(168, 107, 255, 0.15); margin: 16px 0;">
+          
+          <!-- Badges Area -->
+          <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <span id="badgeRole" class="status-badge active" style="background: rgba(111, 62, 255, 0.15); color: var(--accent); border-color: rgba(111, 62, 255, 0.3);">User</span>
+            <span id="badgeActive" class="status-badge active">Active</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Profile Root Form Context -->
+      <section class="col col-md-8">
+        <div class="card">
+          <h1>Account Details</h1>
+          <p class="muted mb-4">Manage your builder credentials and default transport routing information below.</p>
+          
+          <!-- Dynamic Content Root Targeted by user.js -->
+          <div id="profileRoot">
+            <form id="profileForm">
+              
+              <!-- Section A: Base Identity Details -->
+              <h3 class="mb-2" style="color: var(--accent); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">Core Authentication Data</h3>
+              <div class="row mb-4">
+                <div class="col">
+                  <label for="username">Username</label>
+                  <input type="text" id="username" readonly disabled>
+                </div>
+                <div class="col">
+                  <label for="email">Email Address</label>
+                  <input type="email" id="email" readonly disabled>
+                </div>
+              </div>
+
+              <!-- Section B: Customer Details Schema Mapping -->
+              <h3 class="mb-2" style="color: var(--accent); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">Shipping & Contact Information</h3>
+              
+              <div class="row mb-2">
+                <div class="col" style="flex: 0 0 20%;">
+                  <label for="title">Title</label>
+                  <select id="title">
+                    <option value="Mr.">Mr.</option>
+                    <option value="Ms.">Ms.</option>
+                    <option value="Mrs.">Mrs.</option>
+                    <option value="Dr.">Dr.</option>
+                  </select>
+                </div>
+                <div class="col">
+                  <label for="fname">First Name</label>
+                  <input type="text" id="fname" placeholder="First Name">
+                </div>
+                <div class="col">
+                  <label for="lname">Last Name</label>
+                  <input type="text" id="lname" placeholder="Last Name">
+                </div>
+              </div>
+
+              <div class="row mb-2">
+                <div class="col">
+                  <label for="phone">Phone Number</label>
+                  <input type="text" id="phone" placeholder="Contact number">
+                </div>
+              </div>
+
+              <div class="row mb-2">
+                <div class="col">
+                  <label for="addressline">Address Line</label>
+                  <textarea id="addressline" rows="2" placeholder="House/Lot No., Street, Barangay"></textarea>
+                </div>
+              </div>
+
+              <div class="row mb-4">
+                <div class="col">
+                  <label for="town">Town / City</label>
+                  <input type="text" id="town" placeholder="City / Municipality">
+                </div>
+                <div class="col">
+                  <label for="zipcode">Zip Code</label>
+                  <input type="text" id="zipcode" placeholder="Postal Code">
+                </div>
+              </div>
+
+              <!-- Action Submission Controls -->
+              <div style="text-align: right;">
+                <input type="submit" value="Save Changes" style="max-width: 200px;">
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </div>
   </main>
+
+  <!-- Core Script Implementations & Dependancy Initializations -->
   <script src="header.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/api.js"></script>
-  <script src="/js/user.js"></script>
+  
+  <!-- Content Populator Logic Block -->
   <script>
+    // Fetch profile elements upon DOM load execution
+    document.addEventListener("DOMContentLoaded", () => {
+      // Axios request directed toward your user metadata controller endpoint
+      axios.get('/api/user/profile') 
+        .then(response => {
+          const { user, customerDetails } = response.data;
+          
+          // Populate core User structures
+          if(user) {
+            document.getElementById('username').value = user.name || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('displayUserName').innerText = user.name || 'Builder';
+            document.getElementById('displayEmail').innerText = user.email || '';
+            document.getElementById('badgeRole').innerText = user.role || 'user';
+            
+            // Handle activity indicator
+            const activeBadge = document.getElementById('badgeActive');
+            if (user.active) {
+              activeBadge.innerText = "Active";
+              activeBadge.className = "status-badge active";
+            } else {
+              activeBadge.innerText = "Inactive";
+              activeBadge.className = "status-badge inactive";
+            }
+          }
+          
+          // Populate dynamic Customer Details schema attributes
+          if(customerDetails) {
+            document.getElementById('title').value = customerDetails.title || 'Mr.';
+            document.getElementById('fname').value = customerDetails.fname || '';
+            document.getElementById('lname').value = customerDetails.lname || '';
+            document.getElementById('phone').value = customerDetails.phone || '';
+            document.getElementById('addressline').value = customerDetails.addressline || '';
+            document.getElementById('town').value = customerDetails.town || '';
+            document.getElementById('zipcode').value = customerDetails.zipcode || '';
+            
+            // Render custom profile avatar asset if persistent inside DB
+            if (customerDetails.image) {
+              document.getElementById('avatarPreview').src = customerDetails.image;
+            }
+          }
+        })
+        .catch(error => {
+          console.error("Failed to process account payload metrics:", error);
+        });
+    });
+
+    // Native layout structural fetch for header injection
     fetch('header.html')
       .then(r => r.text())
       .then(t => {
@@ -24,5 +182,8 @@
         if (window.initHeaderNav) window.initHeaderNav();
       });
   </script>
+  
+  <!-- Keep your standalone user actions script attached safely -->
+  <script src="/js/user.js"></script>
 </body>
 </html>

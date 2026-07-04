@@ -17,16 +17,35 @@
         root.innerHTML = `
             <div class="card item-detail-card">
                 <h1>${item.name}</h1>
-                <p class="lead">Price: ₱ ${Number(item.price).toFixed(2)}</p>
+                <p class="lead">Price: ₱ ${Number(item.price || item.sell_price || 0).toFixed(2)}</p>
                 <p><strong>Category:</strong> ${item.category || 'Uncategorized'}</p>
                 <p><strong>Stock:</strong> ${item.quantity || 0}</p>
-                <p><strong>Part ID:</strong> ${item.id}</p>
+                <p><strong>Part ID:</strong> ${item.id || item.item_id}</p>
                 <p>${item.description || 'No description available.'}</p>
-                <div class="item-actions">
-                    <a href="item.html" class="btn secondary">Browse more parts</a>
+                <div class="item-actions" style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="btn" id="addToCartBtn" data-item-id="${item.id || item.item_id}" data-name="${item.name}" data-price="${item.price || item.sell_price || 0}">Add to Cart</button>
+                    <a href="/item.html" class="btn secondary">Browse more parts</a>
                 </div>
             </div>
         `;
+
+        // Attach add-to-cart handler
+        const addBtn = document.getElementById('addToCartBtn');
+        if (addBtn) {
+            addBtn.addEventListener('click', function () {
+                const itemId = this.dataset.itemId;
+                const itemName = this.dataset.name;
+                const itemPrice = parseFloat(this.dataset.price);
+                Cart.addItem({
+                    item_id: itemId,
+                    name: itemName || 'Item',
+                    price: itemPrice,
+                    sell_price: itemPrice,
+                    quantity: 1
+                });
+                alert('Added to cart!');
+            });
+        }
     }
 
     function renderPartList(parts) {
@@ -42,11 +61,14 @@
             <div class="card part-card">
                 <div class="part-card-body">
                     <h2>${part.name}</h2>
-                    <p class="lead">₱ ${Number(part.price).toFixed(2)}</p>
+                    <p class="lead">₱ ${Number(part.price || part.sell_price || 0).toFixed(2)}</p>
                     <p><strong>Category:</strong> ${part.category || 'Uncategorized'}</p>
                     <p><strong>Stock:</strong> ${part.quantity || 0}</p>
                     <p>${part.description || 'No description available.'}</p>
-                    <a href="item.html?partId=${part.id}" class="btn">View details</a>
+                    <div style="display: flex; gap: 10px; margin-top: 12px;">
+                        <button class="btn add-to-cart-quick" data-item-id="${part.id || part.item_id}" data-name="${part.name}" data-price="${part.price || part.sell_price || 0}" style="flex: 1;">Add to Cart</button>
+                        <a href="/item.html?partId=${part.id || part.item_id}" class="btn secondary" style="flex: 1; text-align: center;">Details</a>
+                    </div>
                 </div>
             </div>
         `).join('');
@@ -57,14 +79,32 @@
                 <div class="parts-grid">${html}</div>
             </section>
         `;
+
+        // Attach quick add-to-cart handlers
+        document.querySelectorAll('.add-to-cart-quick').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const itemId = this.dataset.itemId;
+                const itemName = this.dataset.name;
+                const itemPrice = parseFloat(this.dataset.price);
+                Cart.addItem({
+                    item_id: itemId,
+                    name: itemName || 'Item',
+                    price: itemPrice,
+                    sell_price: itemPrice,
+                    quantity: 1
+                });
+                alert('Added to cart!');
+            });
+        });
     }
 
     async function loadItem() {
         const partId = getQueryParam('partId');
         if (!partId) {
             try {
-                const { data } = await api.get('/parts');
-                renderPartList(data);
+                const { data } = await api.get('/api/v1/items');
+                const parts = data.rows || data.items || data || [];
+                renderPartList(Array.isArray(parts) ? parts : []);
             } catch (error) {
                 console.error('Failed to load parts', error);
                 renderPartList([]);
@@ -73,7 +113,7 @@
         }
 
         try {
-            const { data } = await api.get(`/parts/${encodeURIComponent(partId)}`);
+            const { data } = await api.get(`/api/v1/items/${encodeURIComponent(partId)}`);
             renderItem(data);
         } catch (error) {
             console.error('Failed to load item', error);

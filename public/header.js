@@ -21,13 +21,7 @@ function initHeaderNav() {
 
   const isAdmin = user.role === 'admin';
   if (!isAdmin) {
-    if (navCart && navCart.parentNode) {
-      navCart.parentNode.removeChild(navCart);
-    }
-    const navDropdown = document.getElementById('adminNavDropdown');
-    if (navDropdown) {
-      navDropdown.style.display = 'none';
-    }
+    if (navDashboard) navDashboard.style.display = 'none';
   }
 
   if (navAuth) {
@@ -40,10 +34,7 @@ function initHeaderNav() {
     if (navCart && navCart.parentNode) {
       navCart.parentNode.removeChild(navCart);
     }
-    const navDropdown = document.getElementById('adminNavDropdown');
-    if (navDropdown) {
-      navDropdown.style.display = 'inline-block';
-    }
+    if (navDashboard) navDashboard.style.display = 'inline-block';
   }
 
   document.addEventListener('click', function (e) {

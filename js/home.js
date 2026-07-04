@@ -74,6 +74,23 @@ $(document).ready(function () {
         navigateToPart(partId);
     });
 
+    $(document).on('click', '.add-to-cart-btn', function (event) {
+        event.preventDefault();
+        if (!window.Cart || typeof window.Cart.addItem !== 'function') return;
+
+        const $btn = $(this);
+        const item = {
+            item_id: $btn.data('item-id'),
+            name: $btn.data('name'),
+            price: parseFloat($btn.data('price')) || 0,
+            sell_price: parseFloat($btn.data('price')) || 0,
+            quantity: 1
+        };
+
+        window.Cart.addItem(item);
+        alert('Added to cart!');
+    });
+
     if ($('#items').length) {
         api.get('/api/v1/items')
             .then(({ data }) => {

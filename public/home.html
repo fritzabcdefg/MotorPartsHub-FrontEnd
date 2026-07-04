@@ -2,46 +2,155 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Home - MotorPartsHub</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+
   <div id="header"></div>
+
+  <!-- Main Layout Wrapper matching image_91060e.jpg workflow -->
   <main class="page-shell">
-    <section class="hero card">
-      <div>
-        <span class="eyebrow">Welcome to</span>
-        <h1>MotorPartsHub</h1>
-        <p class="lead">High-performance car parts, built for the bold. Shop fast, customize harder, and keep your machine running in midnight mode.</p>
+    
+    <!-- 1. Top Hero Section -->
+    <section class="hero-showcase card">
+      <div class="hero-overlay-text">
+        <span class="eyebrow">High Performance Core</span>
+        <h1>MIDNIGHT BUILDS</h1>
+        <p class="lead">Engineered for the bold. High-torque components designed to keep your machine operating at peak potential long after dark.</p>
         <div class="hero-actions">
-          <a href="item.html" class="btn">Browse Parts</a>
-          <a href="dashboard.html" class="btn secondary">Manage Inventory</a>
-        </div>
-      </div>
-      <div class="hero-panel">
-        <div class="panel-card">
-          <h2>Latest Drops</h2>
-          <p>New high-torque coils, premium filters, and boosted intake kits available now.</p>
-          <ul class="feature-list">
-            <li>Fast shipping</li>
-            <li>Performance verified</li>
-            <li>24/7 support</li>
-          </ul>
-          <div class="stat-grid">
-            <div><strong>120+</strong><span>Parts</span></div>
-            <div><strong>35</strong><span>Brands</span></div>
-            <div><strong>99%</strong><span>Positive reviews</span></div>
-          </div>
+          <a href="item.html" class="btn">Explore Inventory</a>
         </div>
       </div>
     </section>
 
+    <!-- 2. Asymmetric 2x2 Category Grid inspired by image_91060e.jpg -->
+    <section class="category-grid">
+      <div class="category-card item-brakes">
+        <div class="category-content">
+          <h3>BRAKE SYSTEMS</h3>
+          <span class="badge-tag">Performance Verified</span>
+          <a href="item.html?cat=brakes" class="btn-link">View Category ➔</a>
+        </div>
+      </div>
+      <div class="category-card item-suspension">
+        <div class="category-content">
+          <h3>SUSPENSION</h3>
+          <span class="badge-tag">Heavy Duty Coils</span>
+          <a href="item.html?cat=suspension" class="btn-link">View Category ➔</a>
+        </div>
+      </div>
+      <div class="category-card item-turbo">
+        <div class="category-content">
+          <h3>TURBO SYSTEMS</h3>
+          <span class="badge-tag">Boost Kits</span>
+          <a href="item.html?cat=turbo" class="btn-link">View Category ➔</a>
+        </div>
+      </div>
+      <div class="category-card item-lighting">
+        <div class="category-content">
+          <h3>HEADLIGHTS & DIODES</h3>
+          <span class="badge-tag">Aggressive Glow</span>
+          <a href="item.html?cat=lighting" class="btn-link">View Category ➔</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Breakout Mid Welcome Banner Section -->
+    <section class="welcome-strip-banner">
+      <div class="strip-container">
+        <div class="strip-text">
+          <h2>WELCOME TO MOTORPARTSHUB</h2>
+          <p>Every single component featured in our core pipeline is styled with a dark core, premium violet trim, and persistent build quality meant to stand up to real stress testing.</p>
+        </div>
+        <div class="strip-graphic-placeholder">
+          <!-- Fits graphic position corresponding to the mechanic in image_91060e.jpg -->
+          <div class="violet-glow-core"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. LIVE PARTS SHOWCASE SECTION (New Feature Addition) -->
+    <section class="parts-showcase-section">
+      <div class="section-header-bar">
+        <h2>FEATURED PARTS DISPATCH</h2>
+        <a href="item.html" class="btn secondary">View All Parts</a>
+      </div>
+      
+      <div class="parts-product-grid">
+        <!-- Part Item 1 -->
+        <article class="card product-display-card">
+          <span class="status-badge active">New Drop</span>
+          <div class="img-container">
+            <img src="/img/placeholder-part1.jpg" alt="High Torque Coil" class="product-img">
+          </div>
+          <div class="product-info">
+            <h3>Hyper-Torque Ignition Coil</h3>
+            <div class="product-meta">
+              <span class="part-price">₱4,250.00</span>
+              <span class="muted">In Stock</span>
+            </div>
+            <button class="btn btn-sm w-100 mt-2">Add To Build</button>
+          </div>
+        </article>
+
+        <!-- Part Item 2 -->
+        <article class="card product-display-card">
+          <span class="status-badge active">Hot</span>
+          <div class="img-container">
+            <img src="/img/placeholder-part2.jpg" alt="Premium Intake" class="product-img">
+          </div>
+          <div class="product-info">
+            <h3>Boosted Cold Air Intake Kit</h3>
+            <div class="product-meta">
+              <span class="part-price">₱8,900.00</span>
+              <span class="muted">3 Left</span>
+            </div>
+            <button class="btn btn-sm w-100 mt-2">Add To Build</button>
+          </div>
+        </article>
+
+        <!-- Part Item 3 -->
+        <article class="card product-display-card">
+          <span class="status-badge active">In Stock</span>
+          <div class="img-container">
+            <img src="/img/placeholder-part3.jpg" alt="Ceramic Pads" class="product-img">
+          </div>
+          <div class="product-info">
+            <h3>Ceramic Compound Brake Pads</h3>
+            <div class="product-meta">
+              <span class="part-price">₱2,150.00</span>
+              <span class="muted">Premium</span>
+            </div>
+            <button class="btn btn-sm w-100 mt-2">Add To Build</button>
+          </div>
+        </article>
+
+        <!-- Part Item 4 -->
+        <article class="card product-display-card">
+          <span class="status-badge active">Bestseller</span>
+          <div class="img-container">
+            <img src="/img/placeholder-part4.jpg" alt="Fuel Filter" class="product-img">
+          </div>
+          <div class="product-info">
+            <h3>Billet Aluminum Fuel Filter</h3>
+            <div class="product-meta">
+              <span class="part-price">₱1,850.00</span>
+              <span class="muted">Verified</span>
+            </div>
+            <button class="btn btn-sm w-100 mt-2">Add To Build</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 5. Quick Part Search Core Utility -->
     <section class="search-card card">
       <div class="search-shell">
         <h2>Quick part search</h2>
-        <p>Type a part name to see instant suggestions from the inventory.</p>
+        <p>Type a component identifier to pull instant suggestion sets from the SQLite runtime index.</p>
         <div class="search-field">
           <input id="partSearch" type="text" placeholder="Search parts, e.g. brake pads" autocomplete="off">
           <div id="searchResults" class="search-results"></div>
@@ -49,14 +158,18 @@
       </div>
     </section>
 
+    <!-- 6. Bottom Services & Infrastructure Matrix -->
     <section class="spotlight">
       <article class="card spotlight-card">
-        <h2>Built for midnight builds</h2>
-        <p>Every component is styled with a dark core, aggressive purple glow, and a premium feel that matches your garage aesthetic.</p>
+        <h2>Persistence Core</h2>
+        <p>All data assets, client system profiles, and order configuration details are safely committed down to local SQLite tables.</p>
       </article>
       <article class="card spotlight-card">
-        <h2>Plug into persistence</h2>
-        <p>Inventory, user profiles, and orders are now backed by SQLite so your data stays ready when your server comes back online.</p>
+        <div class="stat-grid">
+          <div><strong>120+</strong><span>Parts Live</span></div>
+          <div><strong>35</strong><span>Elite Brands</span></div>
+          <div><strong>99%</strong><span>Response Rate</span></div>
+        </div>
       </article>
     </section>
   </main>
@@ -76,6 +189,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/api.js"></script>
+  <script src="/js/cart.js"></script>
   <script src="/js/home.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
