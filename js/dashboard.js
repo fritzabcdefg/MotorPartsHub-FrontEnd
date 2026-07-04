@@ -1,6 +1,5 @@
 // Admin Dashboard with user management
 (function () {
-    const API_BASE = 'http://localhost:4000/api/v1';
     const DASHBOARD_SECTIONS = ['admin-users', 'admin-inventory', 'admin-orders'];
 
     function showDashboardSection(sectionId) {
@@ -21,42 +20,36 @@
     function init() {
         User.initSession();
 
-        // Check if user is logged in and is admin
         if (!User.isLoggedIn()) {
-            window.location.href = 'login.html';
+            window.location.href = '/login.html';
             return;
         }
 
         const currentUser = User.profile();
-        if (currentUser.role !== 'admin') {
+        if (!currentUser || currentUser.role !== 'admin') {
             alert('Access denied. Admin role required.');
-            window.location.href = 'home.html';
+            window.location.href = '/home.html';
             return;
         }
 
         window.addEventListener('hashchange', updateDashboardViewFromHash);
         window.updateDashboardViewFromHash = updateDashboardViewFromHash;
         loadUsers();
-        Inventory.init();
-        Orders.init();
+        if (window.Orders) window.Orders.init();
     }
 
     function loadUsers() {
         const token = User.getToken();
         
-        $.ajax({
-            url: `${API_BASE}/users`,
-            type: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+        api.get('/api/v1/users', {
+            headers: { 'Authorization': `Bearer ${token}` }
         })
-        .done(function(response) {
-            renderUsersTable(response.users);
+        .then(response => {
+            renderUsersTable(response.data.users);
         })
-        .fail(function(xhr) {
-            alert('Failed to load users: ' + (xhr.responseJSON?.message || 'Unknown error'));
-            console.error(xhr);
+        .catch(error => {
+            alert('Failed to load users: ' + (error.response?.data?.message || 'Unknown error'));
+            console.error(error);
         });
     }
 
@@ -144,21 +137,16 @@
     function updateUserRole(userId, newRole) {
         const token = User.getToken();
 
-        $.ajax({
-            url: `${API_BASE}/users/${userId}/role`,
-            type: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify({ role: newRole })
-        })
-        .done(function(response) {
+        api.put(`/api/v1/users/${userId}/role`, 
+            { role: newRole },
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        )
+        .then(response => {
             alert('User role updated successfully.');
             loadUsers();
         })
-        .fail(function(xhr) {
-            alert('Failed to update role: ' + (xhr.responseJSON?.message || 'Unknown error'));
+        .catch(error => {
+            alert('Failed to update role: ' + (error.response?.data?.message || 'Unknown error'));
             loadUsers();
         });
     }
@@ -166,21 +154,19 @@
     function deactivateUser(email) {
         const token = User.getToken();
 
-        $.ajax({
-            url: `${API_BASE}/deactivate`,
-            type: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify({ email })
-        })
-        .done(function(response) {
+        api.delete('/api/v1/deactivate',
+            { 
+                data: { email },
+                headers: { 'Authorization': `Bearer ${token}` }
+            }
+        )
+        .then(response => {
             alert('User deactivated successfully.');
             loadUsers();
         })
-        .fail(function(xhr) {
-            alert('Failed to deactivate user: ' + (xhr.responseJSON?.message || 'Unknown error'));
+        .catch(error => {
+            alert('Failed to deactivate user: ' + (error.response?.data?.message || 'Unknown error'));
+            loadUsers();
         });
     }
 

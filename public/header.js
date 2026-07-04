@@ -6,7 +6,7 @@ function initHeaderNav() {
   if (!stored) {
     if (navAuth) {
       navAuth.textContent = 'Login';
-      navAuth.href = 'login.html';
+      navAuth.href = '/login.html';
     }
     return;
   }
@@ -50,7 +50,7 @@ function initHeaderNav() {
     if (e.target && (e.target.id === 'navLogout' || e.target.closest('#navLogout'))) {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      window.location.href = 'login.html';
+      window.location.href = '/login.html';
     }
   });
 }

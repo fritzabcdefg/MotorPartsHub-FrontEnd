@@ -1,6 +1,5 @@
-// User auth helper with jQuery AJAX
+// User auth helper with axios
 (function (global) {
-    const API_BASE = 'http://localhost:4000/api/v1';
     let currentUser = null;
     let currentToken = null;
 
@@ -15,21 +14,11 @@
     }
 
     function register(data) {
-        return $.ajax({
-            url: `${API_BASE}/register`,
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data)
-        });
+        return api.post('/api/v1/register', data);
     }
 
     function login(credentials) {
-        return $.ajax({
-            url: `${API_BASE}/login`,
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(credentials)
-        });
+        return api.post('/api/v1/login', credentials);
     }
 
     function logout() {
@@ -76,13 +65,13 @@
             }
 
             register({ name, email, password })
-                .done(function(response) {
+                .then(function(response) {
                     alert('Registration successful! Please log in.');
                     window.location.href = 'login.html';
                 })
-                .fail(function(xhr) {
-                    const error = xhr.responseJSON?.message || 'Registration failed.';
-                    alert(error);
+                .catch(function(error) {
+                    const message = error.response?.data?.message || 'Registration failed.';
+                    alert(message);
                 });
         });
 
@@ -98,20 +87,26 @@
                 return;
             }
 
-            login({ email, password })
-                .done(function(response) {
-                    setSession(response.user, response.token);
+            const payload = { email: String(email).trim(), password: String(password) };
+
+            api.post('/api/v1/login', payload)
+                .then(function(response) {
+                    const user = response.data?.user;
+                    const token = response.data?.token;
+                    if (!user || !token) {
+                        throw new Error('Login response was incomplete.');
+                    }
+                    setSession(user, token);
                     alert('Login successful!');
-                    // Redirect based on role
-                    if (response.user.role === 'admin') {
+                    if (user.role === 'admin') {
                         window.location.href = 'dashboard.html';
                     } else {
                         window.location.href = 'home.html';
                     }
                 })
-                .fail(function(xhr) {
-                    const error = xhr.responseJSON?.message || 'Login failed.';
-                    alert(error);
+                .catch(function(error) {
+                    const message = error.response?.data?.message || error.message || 'Login failed.';
+                    alert(message);
                 });
         });
     });

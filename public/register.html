@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Register - MotorPartsHub</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <div id="header"></div>
@@ -25,7 +25,9 @@
     </main>
   </div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="../js/user.js"></script>
-  <script>fetch('header-guest.html').then(r=>r.text()).then(t=>{document.getElementById('header').innerHTML=t});</script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/user.js"></script>
+  <script>fetch('/header-guest.html').then(r=>r.text()).then(t=>{document.getElementById('header').innerHTML=t});</script>
 </body>
 </html>

@@ -63,13 +63,8 @@
         const partId = getQueryParam('partId');
         if (!partId) {
             try {
-                const response = await fetch('http://localhost:4000/parts');
-                if (!response.ok) {
-                    renderPartList([]);
-                    return;
-                }
-                const parts = await response.json();
-                renderPartList(parts);
+                const { data } = await api.get('/parts');
+                renderPartList(data);
             } catch (error) {
                 console.error('Failed to load parts', error);
                 renderPartList([]);
@@ -78,13 +73,8 @@
         }
 
         try {
-            const response = await fetch(`http://localhost:4000/parts/${encodeURIComponent(partId)}`);
-            if (!response.ok) {
-                renderItem(null);
-                return;
-            }
-            const item = await response.json();
-            renderItem(item);
+            const { data } = await api.get(`/parts/${encodeURIComponent(partId)}`);
+            renderItem(data);
         } catch (error) {
             console.error('Failed to load item', error);
             renderItem(null);
