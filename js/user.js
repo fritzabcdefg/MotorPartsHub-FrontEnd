@@ -3,13 +3,36 @@
     let currentUser = null;
     let currentToken = null;
 
+    function clearSession(redirectTo = null) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('mph_cart_v1');
+        currentUser = null;
+        currentToken = null;
+        window.dispatchEvent(new Event('auth:changed'));
+        window.dispatchEvent(new CustomEvent('cart:updated'));
+
+        if (redirectTo) {
+            window.location.replace(redirectTo);
+        }
+    }
+
     // Check localStorage for existing session
     function initSession() {
         const stored = localStorage.getItem('user');
         const token = localStorage.getItem('token');
-        if (stored && token) {
+
+        if (!stored || !token) {
+            clearSession();
+            return;
+        }
+
+        try {
             currentUser = JSON.parse(stored);
             currentToken = token;
+        } catch (err) {
+            console.error('Invalid user JSON in localStorage', err);
+            clearSession();
         }
     }
 
@@ -21,12 +44,8 @@
         return api.post('/api/v1/login', credentials);
     }
 
-    function logout() {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        currentUser = null;
-        currentToken = null;
-        window.location.href = 'login.html';
+    function logout(redirectTo = '/login.html') {
+        clearSession(redirectTo);
     }
 
     function profile() {
@@ -42,6 +61,7 @@
         currentToken = token;
         localStorage.setItem('user', JSON.stringify(user));
         localStorage.setItem('token', token);
+        window.dispatchEvent(new Event('auth:changed'));
     }
 
     function isLoggedIn() {
@@ -116,6 +136,7 @@
         register, 
         profile, 
         logout, 
+        clearSession,
         getToken, 
         setSession, 
         isLoggedIn, 

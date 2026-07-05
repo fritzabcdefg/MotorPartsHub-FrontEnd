@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Inventory Management - Parts Registry</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <style>
+    body { background-color: #05020a; color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+    .panel-card { background-color: #090314; border: 1px solid rgba(168, 107, 255, 0.2); border-radius: 12px; padding: 24px; max-width: 1200px; margin: 0 auto; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); }
+    .panel-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(168, 107, 255, 0.3); padding-bottom: 12px; margin-bottom: 20px; }
+    .btn-back { background: rgba(168, 107, 255, 0.1); border: 1px solid #a86bff; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+    .btn-back:hover { background: #a86bff; }
+    .table { width: 100% !important; color: #fff !important; margin-top: 15px; border-collapse: collapse; }
+    .table th { background-color: rgba(168, 107, 255, 0.2) !important; color: #ffffff !important; padding: 12px !important; border-bottom: 2px solid #a86bff !important; text-align: left; }
+    .table td { padding: 12px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; }
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: #b3a1d9 !important; margin: 12px 0; }
+    .dataTables_wrapper .dataTables_filter input, .dataTables_wrapper .dataTables_length select { background-color: #140d26 !important; color: #fff !important; border: 1px solid rgba(168, 107, 255, 0.4) !important; padding: 6px; border-radius: 4px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { color: #fff !important; background: rgba(168, 107, 255, 0.1) !important; border: 1px solid rgba(168, 107, 255, 0.3) !important; margin-right: 4px; border-radius: 4px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #a86bff !important; border-color: #a86bff !important; }
+  </style>
+</head>
+<body>
+  <main class="panel-card">
+    <div class="panel-header-row">
+      <h2>Parts & Inventory Tracking</h2>
+        <a href="/dashboard.html" class="btn-back">← Back to Dashboard</a>    </div>
+    <div id="tableContainer">Loading Parts Catalog...</div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/user.js"></script>
+  <script>
+    $(document).ready(function() {
+        User.initSession();
+        const token = User.getToken();
+
+        // Updated to point to your real /api/v1/parts endpoint
+        api.get('/api/v1/parts', { headers: { 'Authorization': `Bearer ${token}` } })
+        .then(res => {
+            const items = res.data.items || res.data.parts || res.data || [];
+            let html = `<table id="inventoryTable" class="table">
+                <thead><tr><th>Part ID</th><th>Item Name</th><th>Category</th><th>Price</th><th>Stock Qty</th></tr></thead>
+                <tbody>${items.map(i => `
+                    <tr>
+                        <td>${i.id || i._id}</td>
+                        <td><strong>${i.name || i.partName || 'Unnamed Part'}</strong></td>
+                        <td>${i.category || 'General'}</td>
+                        <td>₱${parseFloat(i.price || 0).toFixed(2)}</td>
+                        <td>${i.stock ?? i.quantity ?? 0} units</td>
+                    </tr>`).join('')}</tbody></table>`;
+            $('#tableContainer').html(html);
+            $('#inventoryTable').DataTable({ "pageLength": 10 });
+        })
+        .catch(() => $('#tableContainer').html('<p style="color:red">Failed to connect to inventory systems.</p>'));
+    });
+  </script>
+</body>
+</html>

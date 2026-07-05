@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Review Management Hub</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <style>
+    body { background-color: #05020a; color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+    .panel-card { background-color: #090314; border: 1px solid rgba(168, 107, 255, 0.2); border-radius: 12px; padding: 24px; max-width: 1200px; margin: 0 auto; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); }
+    .panel-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(168, 107, 255, 0.3); padding-bottom: 12px; margin-bottom: 20px; }
+    .btn-back { background: rgba(168, 107, 255, 0.1); border: 1px solid #a86bff; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+    .btn-back:hover { background: #a86bff; }
+    .table { width: 100% !important; color: #fff !important; margin-top: 15px; border-collapse: collapse; }
+    .table th { background-color: rgba(168, 107, 255, 0.2) !important; color: #ffffff !important; padding: 12px !important; border-bottom: 2px solid #a86bff !important; text-align: left; }
+    .table td { padding: 12px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; }
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: #b3a1d9 !important; margin: 12px 0; }
+    .dataTables_wrapper .dataTables_filter input, .dataTables_wrapper .dataTables_length select { background-color: #140d26 !important; color: #fff !important; border: 1px solid rgba(168, 107, 255, 0.4) !important; padding: 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <main class="panel-card">
+    <div class="panel-header-row">
+      <h2>Customer Feedback & Reviews Evaluation</h2>
+        <a href="/dashboard.html" class="btn-back">← Back to Dashboard</a>    </div>
+    <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107; padding: 10px; border-radius: 6px; margin-bottom: 15px; color: #ffc107;">
+      ⚠️ <strong>Backend Notice:</strong> Review feedback endpoints are pending integration. Displaying mock sandbox.
+    </div>
+    <div id="tableContainer"></div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready(function() {
+        const mockReviews = [
+            { id: "1", partName: "Microcontroller Unit", reviewer: "Alex G.", rating: 5, comment: "Works perfectly for embedded projects." }
+        ];
+        let html = `<table id="reviewsTable" class="table">
+            <thead><tr><th>Review ID</th><th>Target Product</th><th>Reviewer</th><th>Rating</th><th>Comment Submission</th></tr></thead>
+            <tbody>${mockReviews.map(r => `
+                <tr>
+                    <td>#${r.id}</td><td>${r.partName}</td><td>${r.reviewer}</td>
+                    <td style="color:#ffca28">${'★'.repeat(r.rating)}</td><td>"${r.comment}"</td>
+                </tr>`).join('')}</tbody></table>`;
+        $('#tableContainer').html(html);
+        $('#reviewsTable').DataTable({ "pageLength": 10 });
+    });
+  </script>
+</body>
+</html>

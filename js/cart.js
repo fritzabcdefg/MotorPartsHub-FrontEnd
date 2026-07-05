@@ -10,6 +10,38 @@
     function saveCart(cart) {
         localStorage.setItem(CART_KEY, JSON.stringify(cart));
         updateCartBadge();
+        window.dispatchEvent(new CustomEvent('cart:updated'));
+    }
+
+    function clearCart(silent = false) {
+        localStorage.removeItem(CART_KEY);
+        updateCartBadge();
+        if (!silent) {
+            window.dispatchEvent(new CustomEvent('cart:updated'));
+        }
+    }
+
+    function hasActiveSession() {
+        const storedUser = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        return Boolean(storedUser && token);
+    }
+
+    function updateCheckoutState() {
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (!checkoutBtn) return;
+        const canCheckout = hasActiveSession();
+        checkoutBtn.disabled = !canCheckout;
+        checkoutBtn.textContent = canCheckout ? 'Secure Checkout ➔' : 'Login to Checkout';
+        checkoutBtn.classList.toggle('disabled', !canCheckout);
+        checkoutBtn.style.opacity = canCheckout ? '1' : '0.7';
+    }
+
+    function handleCheckoutClick(event) {
+        if (!hasActiveSession()) {
+            event.preventDefault();
+            window.location.href = '/login.html';
+        }
     }
 
     function addItem(item) {
@@ -19,7 +51,9 @@
             item_id: normalizedId,
             id: normalizedId,
             name: item.name || item.description || 'Unnamed item',
-            quantity: item.quantity || 1
+            price: Number(item.price ?? item.sell_price ?? 0),
+            sell_price: Number(item.sell_price ?? item.price ?? 0),
+            quantity: Number(item.quantity || 1)
         });
         const existing = cart.find(i => String(i.item_id ?? i.id ?? '') === normalizedId);
         if (existing) existing.quantity = (existing.quantity || 0) + (normalizedItem.quantity || 1);
@@ -57,13 +91,36 @@
             badge.textContent = count > 0 ? count : '0';
             return true;
         }
+        window.setTimeout(updateCartBadge, 100);
         return false;
     }
 
     // Update badge on page load and listen for storage changes
-    document.addEventListener('DOMContentLoaded', updateCartBadge);
-    window.addEventListener('load', updateCartBadge);
-    window.addEventListener('storage', updateCartBadge);
+    document.addEventListener('DOMContentLoaded', function () {
+        updateCartBadge();
+        updateCheckoutState();
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (checkoutBtn) {
+            checkoutBtn.removeEventListener('click', handleCheckoutClick);
+            checkoutBtn.addEventListener('click', handleCheckoutClick);
+        }
+    });
+    window.addEventListener('load', function () {
+        updateCartBadge();
+        updateCheckoutState();
+    });
+    window.addEventListener('storage', function () {
+        updateCartBadge();
+        updateCheckoutState();
+    });
+    window.addEventListener('cart:updated', function () {
+        updateCartBadge();
+        updateCheckoutState();
+    });
+    window.addEventListener('auth:changed', function () {
+        updateCartBadge();
+        updateCheckoutState();
+    });
 
-    global.Cart = { getCart, saveCart, addItem, removeItem, updateQuantity, updateCartBadge };
+    global.Cart = { getCart, saveCart, clearCart, addItem, removeItem, updateQuantity, updateCartBadge, hasActiveSession, updateCheckoutState };
 })(window);

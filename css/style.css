@@ -1186,3 +1186,776 @@ button.secondary:hover, .btn.secondary:hover {
 .logout-item:hover {
     background: rgba(255, 82, 82, 0.1) !important;
 }
+/* ==========================================================================
+   MotorPartsHub Global Footer Engine
+   ========================================================================== */
+
+.site-footer {
+    width: 100%;
+    background-color: #0f0720 !important;
+    border-top: 1px solid rgba(168, 107, 255, 0.25) !important;
+    color: #b3a1d9 !important;
+    font-size: 0.95rem;
+    padding: 3rem 0;
+    margin-top: auto;
+}
+
+.site-footer .footer-heading {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+}
+
+.site-footer .small-heading {
+    color: #c49eff !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    font-weight: 800 !important;
+    letter-spacing: 1px;
+}
+
+.footer-text {
+    color: #b3a1d9 !important;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+.footer-nav-list li {
+    margin-bottom: 8px;
+}
+
+.footer-nav-list a {
+    color: #b3a1d9 !important;
+    text-decoration: none !important;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+}
+
+.footer-nav-list a:hover {
+    color: #ffffff !important;
+    transform: translateX(4px);
+    text-shadow: 0 0 8px rgba(168, 107, 255, 0.8);
+}
+
+.footer-email-link {
+    color: #c49eff !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.footer-email-link:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 10px rgba(168, 107, 255, 0.6);
+}
+
+.footer-divider {
+    border-color: rgba(168, 107, 255, 0.15) !important;
+    opacity: 1;
+}
+
+.footer-copyright {
+    color: rgba(179, 161, 217, 0.5) !important;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Responsive Mobile Rules Breakpoint */
+@media (max-width: 767.98px) {
+    .site-footer {
+        padding: 2rem 0;
+    }
+    .site-footer .footer-heading {
+        margin-top: 8px;
+    }
+    .site-footer .copy-row {
+        text-align: left !important;
+    }
+}
+/* ==========================================================================
+   Asymmetrical Geometric Curve Website Footer Base Stylesheet
+   ========================================================================== */
+
+.site-footer {
+    width: 100%;
+    /* Asymmetrical top edge layout matching image_9dc4d0.jpg */
+    border-top-left-radius: 125px !important; 
+    border-top-right-radius: 0 !important;
+    
+    background: #090314 !important; /* Midnight purple core fill */
+    color: #dfdfdf !important;
+    padding: 5rem 0 2rem 0 !important;
+    margin-top: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Column Brand Text */
+.footer-brand {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #ffffff !important;
+}
+
+.footer-desc {
+    color: #a5a1b5 !important;
+    font-size: 0.88rem;
+    line-height: 1.7;
+}
+
+/* Custom Header Accents with Underline Bars */
+.site-footer .footer-heading {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem;
+    position: relative !important;
+    margin-bottom: 35px !important;
+    padding-bottom: 8px;
+}
+
+/* Double tracking accent line under headers */
+.site-footer .footer-heading::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    height: 4px;
+    background: #ffffff;
+    border-radius: 2px;
+}
+
+/* Text Element Layouts */
+.footer-address {
+    color: #a5a1b5 !important;
+    font-size: 0.88rem;
+    font-style: normal;
+}
+
+.footer-mail-anchor {
+    color: #a5a1b5 !important;
+    text-decoration: underline !important;
+    font-size: 0.85rem;
+}
+
+/* Link Tree List Elements */
+.footer-links-tree li {
+    margin-bottom: 12px;
+}
+
+.footer-links-tree a {
+    color: #a5a1b5 !important;
+    text-decoration: none !important;
+    font-size: 0.92rem;
+    transition: color 0.2s ease;
+}
+
+.footer-links-tree a:hover {
+    color: #ffffff !important;
+}
+
+/* Inline Single-Line Newsletter Input Box */
+.footer-newsletter-form {
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    padding-bottom: 8px !important;
+}
+
+.footer-newsletter-form .input-icon-left {
+    position: absolute;
+    left: 2px;
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+}
+
+.footer-newsletter-form input {
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    width: 100% !important;
+    padding: 2px 35px 2px 28px !important;
+    font-size: 0.88rem;
+}
+
+.footer-newsletter-form input:focus {
+    outline: none !important;
+}
+
+.footer-newsletter-form button {
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    position: absolute !important;
+    right: 2px !important;
+    cursor: pointer;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.footer-newsletter-form button:hover {
+    color: #a86bff !important;
+}
+
+/* Circular Solid Floating Social Icons Matrix */
+.footer-social-row {
+    display: flex !important;
+    gap: 12px !important;
+    margin-top: 25px;
+}
+
+.social-circle {
+    width: 38px !important;
+    height: 38px !important;
+    background: #ffffff !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #090314 !important;
+    text-decoration: none !important;
+    transition: transform 0.2s ease, background-color 0.2s ease !important;
+}
+
+.social-circle:hover {
+    transform: translateY(-3px) !important;
+    background-color: #e2d9f3 !important;
+}
+
+/* Horizontal Base Breakline */
+.footer-horizontal-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    margin: 40px 0 20px 0 !important;
+    opacity: 1;
+}
+
+/* Trademark Sub-prose */
+.footer-copyright-text {
+    color: #a5a1b5 !important;
+    font-size: 0.82rem;
+    margin-bottom: 0 !important;
+}
+
+/* Responsive Grid Adaptation Fixes */
+@media (max-width: 991.98px) {
+    .site-footer {
+        border-top-left-radius: 60px !important; /* Scale down edge angle distortion on tablets */
+        padding: 4rem 0 2rem 0 !important;
+    }
+}
+/* ==========================================================================
+   Tight Inline Footer Spacing Matrix Updates
+   ========================================================================== */
+
+.site-footer {
+    width: 100%;
+    border-top-left-radius: 125px !important; 
+    border-top-right-radius: 0 !important;
+    background: #090314 !important;
+    color: #dfdfdf !important;
+    /* Reduced top padding from 5rem to 3.5rem */
+    padding: 3.5rem 0 1.5rem 0 !important;
+    margin-top: auto;
+}
+
+/* Reduced spacing between column text blocks */
+.footer-desc {
+    color: #a5a1b5 !important;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+/* Reduced heading spacing from 35px to 18px to save vertical workspace */
+.site-footer .footer-heading {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 1.05rem;
+    position: relative !important;
+    margin-bottom: 18px !important;
+    padding-bottom: 6px;
+}
+
+.site-footer .footer-heading::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 45px; /* Narrower graphic bar line */
+    height: 3px;
+    background: #ffffff;
+    border-radius: 2px;
+}
+
+.footer-address {
+    color: #a5a1b5 !important;
+    font-size: 0.85rem;
+}
+
+/* Tighten line item trees */
+.footer-links-tree li {
+    margin-bottom: 8px; /* Dropped from 12px */
+}
+
+.footer-links-tree a {
+    color: #a5a1b5 !important;
+    text-decoration: none !important;
+    font-size: 0.88rem;
+}
+
+/* Compact single line input structure form */
+.footer-newsletter-form {
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    padding-bottom: 4px !important;
+}
+
+.footer-newsletter-form input {
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    width: 100% !important;
+    padding: 2px 28px 2px 22px !important;
+    font-size: 0.82rem;
+}
+
+/* Scaled down floating social circle items */
+.footer-social-row {
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 15px; /* Closer to form element boundary box */
+}
+
+.social-circle {
+    width: 32px !important; /* Shrunk from 38px */
+    height: 32px !important;
+    background: #ffffff !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #090314 !important;
+}
+
+.footer-horizontal-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    margin: 25px 0 15px 0 !important; /* Shrunk border margin footprints */
+    opacity: 1;
+}
+/* Safety configurations to prevent elements from wrapping downwards */
+.footer-newsletter-form {
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    padding-bottom: 4px !important;
+    min-width: 180px !important; /* Prevents compression collapsings */
+}
+
+.footer-newsletter-form input {
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    width: 100% !important;
+    padding: 2px 28px 2px 22px !important;
+    font-size: 0.82rem;
+}
+
+/* Force social circles to stay locked in a single row line */
+.footer-social-row {
+    display: flex !important;
+    flex-wrap: nowrap !important; /* Rigidly bans layout wrap downs */
+    gap: 8px !important;
+    margin-top: 15px;
+}
+
+.social-circle {
+    width: 32px !important;
+    height: 32px !important;
+    flex-shrink: 0 !important; /* Prevents squishing into ovals */
+    background: #ffffff !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #090314 !important;
+}
+/* ==========================================================================
+   Far-Right Alignment System Controls
+   ========================================================================== */
+
+/* Structure layout settings for the far right column container */
+.newsletter-col {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important; /* Pulls all child assets right */
+    text-align: right !important;
+}
+
+/* Force form box line element to fill the column space nicely */
+.newsletter-col .footer-newsletter-form {
+    width: 100% !important;
+    max-width: 320px !important;
+}
+
+/* Flushes the underline graphical accent rightwards */
+.newsletter-col .footer-heading::after {
+    left: auto !important;
+    right: 0 !important;
+}
+
+/* Aligns social link matrix rightwards */
+.newsletter-col .footer-social-row {
+    justify-content: flex-end !important;
+    width: 100% !important;
+}
+
+/* Mobile responsive fallback to center text when stacked vertically */
+@media (max-width: 767.98px) {
+    .newsletter-col {
+        align-items: flex-start !important;
+        text-align: left !important;
+        margin-top: 15px;
+    }
+    .newsletter-col .footer-heading::after {
+        right: auto !important;
+        left: 0 !important;
+    }
+    .newsletter-col .footer-social-row {
+        justify-content: flex-start !important;
+    }
+    /* ==========================================================================
+   Persistent Profile Dropdown Engine Matrix
+   ========================================================================== */
+
+    .profile-dropdown-wp {
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-icon-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid rgba(168, 107, 255, 0.4);
+        cursor: pointer;
+        transition: border-color 0.2s ease;
+    }
+
+    .profile-icon-img:hover {
+        border-color: #c49eff;
+    }
+
+    /* Base Hidden State Container */
+    .dropdown-menu-custom {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%; /* Sits exactly at the bottom border line of the parent wrapper */
+        z-index: 1080;
+        min-width: 160px;
+        background: #090314 !important; /* Theme core dark color */
+        border: 1px solid rgba(168, 107, 255, 0.25) !important;
+        border-radius: 8px;
+        padding: 6px 0;
+        list-style: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        margin: 0; /* KEEP THIS AT ZERO to kill any invisible layout gaps */
+    }
+
+    /* Force menu to stay visible on hover OR when JavaScript appends the active key */
+    .profile-dropdown-wp:hover .dropdown-menu-custom,
+    .profile-dropdown-wp.active .dropdown-menu-custom {
+        display: block !important;
+    }
+
+    /* Dropdown Menu Item Styles */
+    .dropdown-item-link {
+        display: block;
+        width: 100%;
+        padding: 8px 16px;
+        color: #b3a1d9 !important;
+        text-decoration: none !important;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.15s ease-in-out;
+    }
+
+    .dropdown-item-link:hover {
+        background: rgba(168, 107, 255, 0.15) !important;
+        color: #ffffff !important;
+        padding-left: 20px; /* Subtle slide indentation on hover */
+    }
+
+    .logout-accent:hover {
+        background: rgba(244, 67, 54, 0.15) !important; /* Red hover accent for logout button option */
+        color: #ff5252 !important;
+    }
+
+    .dropdown-divider-line {
+        border-top: 1px solid rgba(168, 107, 255, 0.15);
+        margin: 4px 0;
+    }
+    /* ==========================================================================
+   Profile Navigation Dropdown Control Engine
+   ========================================================================== */
+
+    .nav-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    /* Base properties for the child drop-card container element */
+    .nav-dropdown .dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 0 !important; /* Kills the dead space layout bug */
+        background-color: #090314 !important; /* Match your deep core theme background */
+        border: 1px solid rgba(168, 107, 255, 0.25) !important;
+        border-radius: 6px;
+        padding: 8px 0;
+        min-width: 170px;
+        z-index: 1050;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Force stay-open behavior via standard CSS hover state OR state class flags */
+    .nav-dropdown:hover .dropdown-menu,
+    .nav-dropdown.active .dropdown-menu {
+        display: block !important;
+    }
+
+    /* Formatting for menu anchor items */
+    .nav-dropdown .dropdown-menu a {
+        display: block !important;
+        width: 100%;
+        padding: 8px 16px !important;
+        color: #b3a1d9 !important;
+        text-decoration: none !important;
+        font-size: 0.88rem;
+        font-weight: 500;
+        transition: all 0.15s ease;
+    }
+
+    .nav-dropdown .dropdown-menu a:hover {
+        background-color: rgba(168, 107, 255, 0.15) !important;
+        color: #ffffff !important;
+    }
+
+    /* Logout action hover highlight overlay */
+    .nav-dropdown .dropdown-menu a.logout-item:hover {
+        background-color: rgba(244, 67, 54, 0.15) !important;
+        color: #ff5252 !important;
+    }
+
+    .nav-dropdown .dropdown-meta {
+        padding: 4px 16px 8px 16px;
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .nav-dropdown .dropdown-divider {
+        height: 1px;
+        background-color: rgba(168, 107, 255, 0.15);
+        margin: 6px 0;
+    }
+    /* ==========================================================================
+   MotorPartsHub Sticky Navigation Dropdown Engine
+   ========================================================================== */
+
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Base Dropdown Menu Layout */
+.nav-dropdown .dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0 !important; /* Eliminates the invisible pixel gap that drops hover states */
+    background-color: #090314 !important; /* Midnight core theme canvas background */
+    border: 1px solid rgba(168, 107, 255, 0.25) !important;
+    border-radius: 6px;
+    padding: 8px 0;
+    min-width: 170px;
+    z-index: 1050;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+/* Keeps menu active on CSS Hover OR active JavaScript class toggle */
+.nav-dropdown:hover .dropdown-menu,
+.nav-dropdown.active .dropdown-menu {
+    display: block !important;
+}
+
+/* Interior Option Anchors */
+.nav-dropdown .dropdown-menu a {
+    display: block !important;
+    width: 100%;
+    padding: 10px 16px !important;
+    color: #b3a1d9 !important;
+    text-decoration: none !important;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+}
+
+.nav-dropdown .dropdown-menu a:hover {
+    background-color: rgba(168, 107, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* Destructive Action Hover State (Logout) */
+.nav-dropdown .dropdown-menu a.logout-item:hover {
+    background-color: rgba(244, 67, 54, 0.15) !important;
+    color: #ff5252 !important;
+}
+
+/* Information Banner Text */
+.nav-dropdown .dropdown-meta {
+    padding: 6px 16px 8px 16px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Graphical Divider Grid Strip */
+.nav-dropdown .dropdown-divider {
+    height: 1px;
+    background-color: rgba(168, 107, 255, 0.15);
+    margin: 6px 0;
+}
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Base properties for the dropdown element block */
+.nav-dropdown .dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0 !important; /* Kills the dead space layout bug that drops hovers */
+    background-color: #090314 !important;
+    border: 1px solid rgba(168, 107, 255, 0.25) !important;
+    border-radius: 6px;
+    padding: 8px 0;
+    min-width: 170px;
+    z-index: 1050;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Combined active rules window matrix */
+.nav-dropdown:hover .dropdown-menu,
+.nav-dropdown.active .dropdown-menu {
+    display: block !important;
+}
+/* Core Palette Configurations */
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: #05020a;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #ffffff;
+    box-sizing: border-box;
+}
+
+.dashboard-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Base Panel Glassmorphism Cards */
+.chart-card, .management-menu-card {
+    background-color: #090314;
+    border: 1px solid rgba(168, 107, 255, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+    color: #b3a1d9;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(168, 107, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+/* Canvas Restrictions */
+.chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 320px;
+}
+
+.chart-wrapper.pie-wrapper {
+    height: 280px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Middle Management Grid Layout */
+.management-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background-color: rgba(168, 107, 255, 0.06);
+    border: 1px solid rgba(168, 107, 255, 0.15);
+    border-radius: 6px;
+    padding: 16px;
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-btn:hover {
+    background-color: rgba(168, 107, 255, 0.18);
+    border-color: #a86bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(168, 107, 255, 0.2);
+}
+
+.menu-btn .icon {
+    font-size: 1.5rem;
+}
+
+/* Bottom Split Layout Panel Grid */
+.bottom-section {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 24px;
+}
+
+/* Responsive adjustments if screen narrows */
+@media (max-width: 850px) {
+    .bottom-section {
+        grid-template-columns: 1fr;
+    }
+}
+}

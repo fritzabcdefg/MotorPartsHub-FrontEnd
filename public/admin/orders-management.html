@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Order Management Ledger</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <style>
+    body { background-color: #05020a; color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+    .panel-card { background-color: #090314; border: 1px solid rgba(168, 107, 255, 0.2); border-radius: 12px; padding: 24px; max-width: 1200px; margin: 0 auto; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); }
+    .panel-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(168, 107, 255, 0.3); padding-bottom: 12px; margin-bottom: 20px; }
+    .btn-back { background: rgba(168, 107, 255, 0.1); border: 1px solid #a86bff; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+    .btn-back:hover { background: #a86bff; }
+    .table { width: 100% !important; color: #fff !important; margin-top: 15px; border-collapse: collapse; }
+    .table th { background-color: rgba(168, 107, 255, 0.2) !important; color: #ffffff !important; padding: 12px !important; border-bottom: 2px solid #a86bff !important; text-align: left; }
+    .table td { padding: 12px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; vertical-align: middle; }
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: #b3a1d9 !important; margin: 12px 0; }
+    .dataTables_wrapper .dataTables_filter input, .dataTables_wrapper .dataTables_length select, select { background-color: #140d26 !important; color: #fff !important; border: 1px solid rgba(168, 107, 255, 0.4) !important; padding: 6px; border-radius: 4px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { color: #fff !important; background: rgba(168, 107, 255, 0.1) !important; border: 1px solid rgba(168, 107, 255, 0.3) !important; margin-right: 4px; border-radius: 4px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #a86bff !important; border-color: #a86bff !important; }
+    
+    /* View Details Button Styles */
+    .btn-action-view { background: rgba(138, 43, 226, 0.2); border: 1px solid #8a2be2; color: #dcd0ff; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .btn-action-view:hover { background: #8a2be2; color: #fff; }
+
+    /* Modal Overlay System Layout Styling */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 2, 10, 0.85); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; }
+    .modal-box { background: #0e071f; border: 2px solid #a86bff; border-radius: 12px; width: 90%; max-width: 700px; padding: 24px; box-shadow: 0 0 30px rgba(168, 107, 255, 0.3); animation: fadeIn 0.25s ease-out; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(168, 107, 255, 0.3); padding-bottom: 10px; margin-bottom: 15px; }
+    .modal-close { background: none; border: none; color: #ff5555; font-size: 24px; cursor: pointer; font-weight: bold; }
+    .modal-close:hover { color: #ff0000; }
+    @keyframes fadeIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  </style>
+</head>
+<body>
+  <main class="panel-card">
+    <div class="panel-header-row">
+      <h2>Order Invoice Fulfillment System</h2>
+        <a href="/dashboard.html" class="btn-back">← Back to Dashboard</a>    </div>
+    <div id="tableContainer">Loading backend transaction logs...</div>
+  </main>
+
+  <!-- Interactive Modal Wrapper for Displaying Individual Orderline Items Breakdown -->
+  <div id="detailsModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTitle" style="margin:0; color:#a86bff;">Order Line Details</h3>
+        <button class="modal-close" id="closeModalBtn">&times;</button>
+      </div>
+      <div id="modalBody">
+        <!-- Dynamic item listing rows append inside here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/user.js"></script>
+
+  <script>
+    $(document).ready(function() { 
+        User.initSession(); 
+        const token = User.getToken(); 
+
+        // 1. Fetch Master Logs
+        api.get('/api/v1/orders', { headers: { 'Authorization': `Bearer ${token}` } }) 
+        .then(res => { 
+            const orders = res.data.orders || []; 
+            
+            let html = `
+            <table id="ordersTable" class="table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer ID</th>
+                        <th>Date Placed</th>
+                        <th>Shipping Fee</th>
+                        <th>Total Charge</th>
+                        <th>Fulfillment Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${orders.map(o => `
+                    <tr>
+                        <td>#${o.id}</td>
+                        <td><span style="color: #b3a1d9;">User Account #${o.customerName}</span></td>
+                        <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+                        <td>₱${parseFloat(o.shipping || 0).toFixed(2)}</td>
+                        <td><strong style="color: #a86bff;">₱${parseFloat(o.totalPrice || 0).toFixed(2)}</strong></td>
+                        <td>
+                            <select class="status-select" data-order-id="${o.id}">
+                                <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn-action-view open-details-btn" data-order-id="${o.id}">View Details</button>
+                        </td>
+                    </tr>
+                    `).join('')}
+                </tbody>
+            </table>`; 
+
+            $('#tableContainer').html(html); 
+            $('#ordersTable').DataTable({ "pageLength": 10, "destroy": true }); 
+
+            // 2. Status Select Event Handler Configuration
+            $('.status-select').change(function() { 
+                const selectedStatus = $(this).val(); 
+                const currentOrderId = $(this).data('order-id'); 
+
+                api.put(`/api/v1/orders/${currentOrderId}/status`, { status: selectedStatus }, { headers: { 'Authorization': `Bearer ${token}` } }) 
+                .then(() => alert('Database status field updated successfully.')) 
+                .catch(() => alert('Status modification rejected. Check admin session rules.')); 
+            });
+
+            // 3. Open Orderline Details Modal on Click Listener 
+            $('.open-details-btn').click(function() {
+                const targetId = $(this).data('order-id');
+                $('#modalTitle').text(`Order Manifest: #${targetId}`);
+                $('#modalBody').html('<p style="color:#b3a1d9">Retrieving shipping manifest records...</p>');
+                $('#detailsModal').css('display', 'flex');
+
+                api.get(`/api/v1/orders/${targetId}`, { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(detailsRes => {
+                    const customer = detailsRes.data.customer || {};
+                    const items = detailsRes.data.items || [];
+
+                    let modalHtml = `
+                    <!-- Customer Context Header Profile Block Card -->
+                    <div style="background: rgba(168, 107, 255, 0.05); border: 1px solid rgba(168, 107, 255, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 8px 0; color: #b3a1d9; border-bottom: 1px dashed rgba(168, 107, 255, 0.2); padding-bottom: 4px;">Fulfillment Delivery Details</h4>
+                        <p style="margin: 4px 0;"><strong>Recipient:</strong> <span style="color:#fff">${customer.customerName || 'N/A'}</span></p>
+                        <p style="margin: 4px 0;"><strong>Shipping Destination Address:</strong> <span style="color:#fff">${customer.shippingAddress || 'No address logged'}</span></p>
+                    </div>
+
+                    <h4 style="margin: 15px 0 8px 0; color: #b3a1d9;">Purchased Parts Breakdowns</h4>
+                    `;
+
+                    if (items.length === 0) {
+                        modalHtml += '<p>No recorded item data lines associated with this entry.</p>';
+                    } else {
+                        modalHtml += `
+                        <table class="table" style="margin-top:0">
+                            <thead>
+                                <tr>
+                                    <th>Item ID</th>
+                                    <th>Name</th>
+                                    <th>Unit Price</th>
+                                    <th>Qty Purchased</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${items.map(i => `
+                                <tr>
+                                    <td>#${i.itemId}</td>
+                                    <td style="color:#a86bff">${i.itemName}</td>
+                                    <td>₱${parseFloat(i.itemPrice).toFixed(2)}</td>
+                                    <td>${i.qty}</td>
+                                    <td><strong>₱${parseFloat(i.subTotal).toFixed(2)}</strong></td>
+                                </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>`;
+                    }
+                    
+                    $('#modalBody').html(modalHtml);
+                })
+                .catch(err => {
+                    $('#modalBody').html('<p style="color:red">Failed to safely parse corresponding item lines logs.</p>');
+                });
+            });
+        }) 
+        .catch(() => $('#tableContainer').html('<div style="color:red; padding:10px;">Failed to establish connection to XAMPP database transaction logs.</div>')); 
+
+        // 4. Close Modal Events
+        $('#closeModalBtn, #detailsModal').click(function(e) {
+            if (e.target === this) $('#detailsModal').css('display', 'none');
+        });
+    });
+  </script>
+</body>
+</html>

@@ -6,6 +6,81 @@
   <title>Your Cart - MotorPartsHub</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* ==========================================================================
+       HIGH CONTRAST TABLE VISIBILITY CONTROLS FOR LIGHT BACKGROUNDS
+       ========================================================================== */
+    .table {
+        background-color: #ffffff !important;
+        border-color: rgba(168, 107, 255, 0.2) !important;
+    }
+    
+    /* Darkened table headers for razor-sharp definition */
+    .table th {
+        color: #2b115c !important; 
+        font-weight: 800 !important;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(168, 107, 255, 0.3) !important;
+        padding: 14px 8px !important;
+    }
+    
+    /* Deep dark charcoal-purple for all raw data input text cells */
+    .table td {
+        color: #11052c !important; 
+        font-weight: 600 !important; 
+        font-size: 0.95rem !important;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(168, 107, 255, 0.15) !important;
+        padding: 16px 8px !important;
+    }
+
+    /* Target classes explicitly to completely override any inherited light styles */
+    .cart-item-name {
+        color: #11052c !important;
+        font-weight: 700 !important;
+    }
+
+    .cart-item-price {
+        color: #11052c !important;
+        font-weight: 600 !important;
+    }
+
+    /* Distinct deep violet hue for the running row subtotal */
+    .item-row-subtotal {
+        color: #6f42c1 !important; 
+        font-weight: 700 !important;
+    }
+    
+    /* Form input & Selection Checkbox styling updates */
+    .cart-select-item {
+        width: 18px;
+        height: 18px;
+        accent-color: #6f42c1;
+        cursor: pointer;
+    }
+    
+    .cart-qty-input {
+        width: 65px;
+        text-align: center;
+        background: #090314 !important;
+        border: 1px solid rgba(168, 107, 255, 0.4) !important;
+        color: #ffffff !important;
+        border-radius: 4px;
+        padding: 4px;
+        font-weight: 700;
+    }
+
+    /* Styling adjustments for dark text inside summary summary boxes */
+    .summary-text-dark {
+        color: #11052c !important;
+        font-weight: 600;
+    }
+    .summary-title-dark {
+        color: #2b115c !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -22,10 +97,11 @@
           <h2>Your Build Manifest</h2>
           <p class="muted mb-4">Review your selected components before initiating dispatch routing pipelines.</p>
           
-          <div class="table-responsive">
-            <table class="table">
+          <div class="table-responsive" style="border-radius: 8px; overflow: hidden;">
+            <table class="table mb-0">
               <thead>
                 <tr>
+                  <th style="text-align: center; width: 50px;">Select</th>
                   <th>Part Element</th>
                   <th>Price</th>
                   <th style="text-align: center; width: 100px;">Qty</th>
@@ -37,8 +113,8 @@
               <tbody id="cartItems">
                 <!-- Fallback empty state message if script reads zero elements -->
                 <tr id="emptyCartMessage">
-                  <td colspan="5" class="text-center muted" style="padding: 40px 0;">
-                    Your cart is currently empty. Head back to the <a href="/home.html" style="color: var(--accent);">homepage</a> to configure parts.
+                  <td colspan="6" class="text-center" style="padding: 40px 0; color: #5a4b76 !important;">
+                    Your cart is currently empty. Head back to the <a href="/home.html" style="color: #6f42c1; font-weight: 700;">homepage</a> to configure parts.
                   </td>
                 </tr>
               </tbody>
@@ -50,22 +126,22 @@
       <!-- Right Column: Order Summary Checkout Processing Box -->
       <section class="col col-md-4">
         <div class="card">
-          <h3 style="color: var(--accent); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.5px;" class="mb-4">Order Summary</h3>
+          <h3 style="font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.5px;" class="mb-4 summary-title-dark">Order Summary</h3>
           
           <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
             <span class="muted">Subtotal</span>
-            <span id="cartSubtotal" style="font-weight: 600;">₱0.00</span>
+            <span id="cartSubtotal" class="summary-text-dark">₱0.00</span>
           </div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
             <span class="muted">Estimated Shipping</span>
-            <span style="color: #52c456; font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">FREE</span>
+            <span style="color: #28a745; font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">FREE</span>
           </div>
           
           <hr style="border-color: rgba(168, 107, 255, 0.2); margin: 18px 0;">
           
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <span style="font-weight: 700; font-size: 1.1rem;">Total Cost</span>
-            <span id="cartTotal" style="font-size: 1.4rem; font-weight: 700; color: var(--accent);">₱0.00</span>
+            <span style="font-weight: 700; font-size: 1.1rem; color: #11052c;">Total Cost</span>
+            <span id="cartTotal" style="font-size: 1.4rem; font-weight: 800; color: #6f42c1;">₱0.00</span>
           </div>
 
           <!-- Checkout Dispatch Controls -->
@@ -80,7 +156,8 @@
   <div id="footer" class="site-footer"></div>
 
   <!-- Asynchronous Header/Footer Initialization Scripts -->
-  <script src="/header.js"></script>
+  <script src="/js/user.js"></script>
+  <script src="/js/header.js"></script>
   <script>
     fetch('/header.html')
       .then(r => r.text())
@@ -98,34 +175,60 @@
   <script src="/js/cart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   <script>
+    // Dynamically calculate order costs based strictly on items marked with active checkbox targets
+    function calculateSelectedTotal() {
+      let selectedSubtotal = 0;
+      
+      document.querySelectorAll('.cart-item-row').forEach(row => {
+        const checkbox = row.querySelector('.cart-select-item');
+        if (checkbox && checkbox.checked) {
+          const price = parseFloat(row.dataset.price) || 0;
+          const qty = parseInt(row.querySelector('.cart-qty-input').value) || 1;
+          selectedSubtotal += price * qty;
+        }
+      });
+      
+      document.getElementById('cartSubtotal').textContent = '₱ ' + selectedSubtotal.toFixed(2);
+      document.getElementById('cartTotal').textContent = '₱ ' + selectedSubtotal.toFixed(2);
+    }
+
     // Render cart items and totals on page load
     function renderCartItems() {
-      const cart = Cart.getCart();
       const tbody = document.getElementById('cartItems');
-      const emptyMsg = document.getElementById('emptyCartMessage');
-      
-      if (!cart || cart.length === 0) {
-        emptyMsg.style.display = 'table-row';
-        tbody.innerHTML = '<tr id="emptyCartMessage"><td colspan="5" class="text-center muted" style="padding: 40px 0;">Your cart is currently empty. Head back to the <a href="/home.html" style="color: var(--accent);">homepage</a> to configure parts.</td></tr>';
+
+      if (!Cart.hasActiveSession()) {
+        Cart.clearCart(true);
+        tbody.innerHTML = '<tr id="emptyCartMessage"><td colspan="6" class="text-center" style="padding: 40px 0; color: #5a4b76 !important;">Your cart is currently empty. Head back to the <a href="/home.html" style="color: #6f42c1; font-weight: 700;">homepage</a> to configure parts.</td></tr>';
         document.getElementById('cartSubtotal').textContent = '₱0.00';
         document.getElementById('cartTotal').textContent = '₱0.00';
+        Cart.updateCheckoutState();
+        return;
+      }
+
+      const cart = Cart.getCart();
+      
+      if (!cart || cart.length === 0) {
+        tbody.innerHTML = '<tr id="emptyCartMessage"><td colspan="6" class="text-center" style="padding: 40px 0; color: #5a4b76 !important;">Your cart is currently empty. Head back to the <a href="/home.html" style="color: #6f42c1; font-weight: 700;">homepage</a> to configure parts.</td></tr>';
+        document.getElementById('cartSubtotal').textContent = '₱0.00';
+        document.getElementById('cartTotal').textContent = '₱0.00';
+        Cart.updateCheckoutState();
         return;
       }
       
-      emptyMsg.style.display = 'none';
-      let subtotal = 0;
       const rows = cart.map(item => {
         const itemPrice = parseFloat(item.price || item.sell_price || 0);
         const itemSubtotal = itemPrice * (item.quantity || 1);
-        subtotal += itemSubtotal;
         return `
-          <tr>
-            <td>${item.name || 'Unknown Item'}</td>
-            <td>₱ ${itemPrice.toFixed(2)}</td>
+          <tr class="cart-item-row" data-item-id="${item.item_id}" data-price="${itemPrice}">
             <td style="text-align: center;">
-              <input type="number" min="1" value="${item.quantity || 1}" class="cart-qty-input" data-item-id="${item.item_id}" style="width: 60px; text-align: center;">
+              <input type="checkbox" class="cart-select-item" checked data-item-id="${item.item_id}">
             </td>
-            <td style="text-align: right;">₱ ${itemSubtotal.toFixed(2)}</td>
+            <td class="cart-item-name">${item.name || 'Unknown Item'}</td>
+            <td class="cart-item-price">₱ ${itemPrice.toFixed(2)}</td>
+            <td style="text-align: center;">
+              <input type="number" min="1" value="${item.quantity || 1}" class="cart-qty-input" data-item-id="${item.item_id}">
+            </td>
+            <td style="text-align: right;" class="item-row-subtotal">₱ ${itemSubtotal.toFixed(2)}</td>
             <td style="text-align: center;">
               <button class="btn-remove" data-item-id="${item.item_id}" style="background: #f44336; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Remove</button>
             </td>
@@ -134,16 +237,30 @@
       }).join('');
       
       tbody.innerHTML = rows;
-      document.getElementById('cartSubtotal').textContent = '₱ ' + subtotal.toFixed(2);
-      document.getElementById('cartTotal').textContent = '₱ ' + subtotal.toFixed(2);
+      
+      // Calculate final pricing display matrix
+      calculateSelectedTotal();
+      
+      // Attach checkbox dynamic alteration click elements
+      document.querySelectorAll('.cart-select-item').forEach(checkbox => {
+        checkbox.addEventListener('change', calculateSelectedTotal);
+      });
       
       // Attach quantity change handlers
       document.querySelectorAll('.cart-qty-input').forEach(input => {
         input.addEventListener('change', function () {
           const itemId = this.dataset.itemId;
           const qty = parseInt(this.value) || 1;
+          
+          // Update underlying programmatic storage instance
           Cart.updateQuantity(itemId, qty);
-          renderCartItems();
+          
+          // Update immediate UI row cell subtotal without resetting checkbox inputs
+          const row = this.closest('.cart-item-row');
+          const price = parseFloat(row.dataset.price) || 0;
+          row.querySelector('.item-row-subtotal').textContent = '₱ ' + (price * qty).toFixed(2);
+          
+          calculateSelectedTotal();
         });
       });
       
@@ -155,9 +272,17 @@
           renderCartItems();
         });
       });
+
+      Cart.updateCheckoutState();
     }
     
     document.addEventListener('DOMContentLoaded', renderCartItems);
+    window.addEventListener('load', renderCartItems);
+    window.addEventListener('storage', renderCartItems);
+    window.addEventListener('cart:updated', renderCartItems);
+    window.addEventListener('auth:changed', renderCartItems);
   </script>
+  <!-- Clean Shell Anchor Element for Async Footer Delivery -->
+<footer id="footer" class="site-footer py-5 mt-auto"></footer>
 </body>
 </html>

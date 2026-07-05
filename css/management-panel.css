@@ -1,0 +1,15 @@
+body { background-color: #05020a; color: #ffffff; font-family: sans-serif; padding: 20px; }
+.panel-card { background-color: #090314; border: 1px solid rgba(168, 107, 255, 0.2); border-radius: 12px; padding: 24px; max-width: 1200px; margin: 0 auto; }
+.panel-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(168, 107, 255, 0.3); padding-bottom: 12px; margin-bottom: 20px; }
+.btn-back { background: rgba(168, 107, 255, 0.1); border: 1px solid #a86bff; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; }
+.btn-back:hover { background: #a86bff; }
+.table { width: 100% !important; color: #fff !important; margin-top: 15px; }
+.table th { background-color: rgba(168, 107, 255, 0.2) !important; color: #ffffff !important; padding: 12px !important; border-bottom: 2px solid #a86bff !important; }
+.table td { padding: 12px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; }
+.dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: #b3a1d9 !important; margin: 12px 0; }
+.dataTables_wrapper .dataTables_filter input { background-color: #140d26 !important; color: #fff !important; border: 1px solid rgba(168, 107, 255, 0.4) !important; padding: 4px; border-radius: 4px; }
+select { background: #140d26; color: #fff; border: 1px solid rgba(168, 107, 255, 0.4); padding: 4px; border-radius: 4px; }
+.btn-deactivate { background-color: #d9534f; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+.status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; }
+.status-badge.active { background-color: rgba(76, 175, 80, 0.2); color: #4caf50; }
+.status-badge.inactive { background-color: rgba(244, 67, 54, 0.2); color: #f44336; }
