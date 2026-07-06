@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Setup Profile - MotorPartsHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { background-color: #05020a; color: #ffffff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+    .card { background-color: #090314; border: 1px solid rgba(168, 107, 255, 0.2); border-radius: 12px; padding: 28px; max-width: 600px; margin: 40px auto; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); }
+    h1 { color: #a86bff; border-bottom: 2px solid rgba(168, 107, 255, 0.15); padding-bottom: 10px; }
+    .form-row { display: flex; gap: 16px; margin-bottom: 12px; }
+    .form-group { flex: 1; display: flex; flex-direction: column; }
+    label { margin-bottom: 6px; font-size: 0.9rem; color: #b3a1d9; }
+    input, select { background: #120b24; border: 1px solid rgba(168, 107, 255, 0.2); color: #fff; padding: 10px; border-radius: 6px; }
+    input:focus, select:focus { border-color: #a86bff; outline: none; }
+    input[type="submit"] { background: #a86bff; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    input[type="submit"]:hover { background: #b57fff; }
+  </style>
+</head>
+<body>
+  <div id="header"></div>
+  <div class="card">
+    <h1>Complete Your Profile</h1>
+    <p>Your email has been verified! Let's complete your customer record file settings.</p>
+    
+    <form id="profileForm">
+      <div class="form-row">
+        <div class="form-group" style="flex: 0 0 100px;">
+          <label for="title">Title</label>
+          <select id="title">
+            <option value="Mr.">Mr.</option>
+            <option value="Ms.">Ms.</option>
+            <option value="Mrs.">Mrs.</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fname">First Name</label>
+          <input id="fname" type="text" required>
+        </div>
+        <div class="form-group">
+          <label for="lname">Last Name</label>
+          <input id="lname" type="text" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input id="phone" type="text" placeholder="e.g. 09123456789">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label for="addressline">Address Line</label>
+        <input id="addressline" type="text" placeholder="Street name, Barangay" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="town">Town / City</label>
+          <input id="town" type="text" required>
+        </div>
+        <div class="form-group">
+          <label for="zipcode">Zip Code</label>
+          <input id="zipcode" type="text">
+        </div>
+      </div>
+
+      <input type="submit" value="Save Profile & Continue">
+    </form>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  
+  <script>
+    // 1. Extract variables directly from URL parameters injected by backend redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    let token = urlParams.get('token');
+    let userId = urlParams.get('userId');
+    let email = urlParams.get('email');
+
+    // 2. FALLBACK CHECK: If parameters exist in URL, save them. If not, recover them from localStorage.
+    if (token && userId) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify({ id: userId, email: email, role: 'user' }));
+    } else {
+        token = localStorage.getItem('token');
+        const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        userId = savedUser.id;
+        email = savedUser.email;
+    }
+
+    // Safety warning if the user accessed this page without a valid activation session link
+    if (!userId) {
+        alert('⚠️ Session tracking lost. Please open the activation link sent to your email again.');
+    }
+
+    // 3. Load Guest Header layout
+    fetch('/header-guest.html').then(r=>r.text()).then(t=>{document.getElementById('header').innerHTML=t});
+
+    // 4. Form Submission Logic
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Prevent pushing empty string values down the wire if verification session failed
+        if (!userId) {
+            alert('Cannot submit: Your User ID is missing. Please re-open the activation link from your email.');
+            return;
+        }
+
+        const profileData = {
+            userId: userId, // Now safely pulled from either the URL bar or active localStorage session
+            title: document.getElementById('title').value,
+            fname: document.getElementById('fname').value,
+            lname: document.getElementById('lname').value,
+            phone: document.getElementById('phone').value,
+            addressline: document.getElementById('addressline').value,
+            town: document.getElementById('town').value,
+            zipcode: document.getElementById('zipcode').value
+        };
+
+        try {
+            const res = await axios.post('http://localhost:4000/api/v1/setup-profile', profileData);
+            if (res.data.success) {
+                // FIX: Instantly inject the newly filled name into local storage session data
+                const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+                savedUser.name = `${profileData.fname} ${profileData.lname}`;
+                localStorage.setItem('user', JSON.stringify(savedUser));
+
+                // Force header updates to read the change immediately
+                window.dispatchEvent(new Event('auth:changed'));
+
+                alert('Profile configured completely!');
+                window.location.replace('/home.html'); 
+            }
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed saving customer data details.');
+        }
+    });
+</script>
+</body>
+</html>

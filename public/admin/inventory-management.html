@@ -48,7 +48,7 @@
                         <td>${i.id || i._id}</td>
                         <td><strong>${i.name || i.partName || 'Unnamed Part'}</strong></td>
                         <td>${i.category || 'General'}</td>
-                        <td>₱${parseFloat(i.price || 0).toFixed(2)}</td>
+                        <td>₱${parseFloat(i.sell_price || 0).toFixed(2)}</td>
                         <td>${i.stock ?? i.quantity ?? 0} units</td>
                     </tr>`).join('')}</tbody></table>`;
             $('#tableContainer').html(html);

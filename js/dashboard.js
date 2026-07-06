@@ -1,117 +1,58 @@
 (function () {
-    function init() {
-        User.initSession();
-        if (!User.isLoggedIn()) {
-            window.location.href = '/login.html';
-            return;
-        }
-        const currentUser = User.profile();
-        if (!currentUser || currentUser.role !== 'admin') {
-            alert('Access denied. Admin role required.');
-            window.location.href = '/home.html';
-            return;
-        }
+    let salesChart, barChart, pieChart;
 
+    async function init() {
         renderCharts();
-        fetchSystemRecordCounters();
-    }
-
-    function fetchSystemRecordCounters() {
-        const token = User.getToken();
-        const config = { headers: { 'Authorization': `Bearer ${token}` } };
-
-        api.get('/api/v1/users', config).then(res => {
-            $('#userCount').text(`${res.data.users?.length || 0} Accounts Total`);
-        }).catch(() => $('#userCount').text('Connected'));
-
-        api.get('/api/v1/inventory', config).then(res => {
-            const total = res.data.items?.length || res.data.length || 0;
-            $('#inventoryCount').text(`${total} Units Configured`);
-        }).catch(() => $('#inventoryCount').text('Loaded'));
-
-        api.get('/api/v1/orders', config).then(res => {
-            const total = res.data.orders?.length || res.data.length || 0;
-            $('#orderCount').text(`${total} Invoices Generated`);
-        }).catch(() => $('#orderCount').text('Verified'));
-
-        api.get('/api/v1/reviews', config).then(res => {
-            const total = res.data.reviews?.length || res.data.length || 0;
-            $('#reviewCount').text(`${total} Submissions`);
-        }).catch(() => $('#reviewCount').text('Online'));
-
-        api.get('/api/v1/categories', config).then(res => {
-            const total = res.data.categories?.length || res.data.length || 0;
-            $('#categoryCount').text(`${total} Departments`);
-        }).catch(() => $('#categoryCount').text('Active'));
+        await refreshCharts(); // Fetch initial data
     }
 
     function renderCharts() {
-        try {
-            if (window.Chart) {
-                Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
-                Chart.defaults.borderColor = 'rgba(168, 107, 255, 0.1)';
+        if (!window.Chart) return;
+        
+        // Destroy existing to prevent "Canvas already in use"
+        if (salesChart) salesChart.destroy();
+        if (barChart) barChart.destroy();
+        if (pieChart) pieChart.destroy();
 
-                const salesCanvas = document.getElementById('salesLineChart');
-                if (salesCanvas) {
-                    new Chart(salesCanvas.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: ['July 1', 'July 2', 'July 3', 'July 4', 'July 5'],
-                            datasets: [{
-                                label: 'Gross Revenue Output (₱)',
-                                data: [1950, 6600, 1560, 2100, 5450], 
-                                borderColor: '#a86bff',
-                                backgroundColor: 'rgba(168, 107, 255, 0.05)',
-                                borderWidth: 3,
-                                tension: 0.3,
-                                fill: true,
-                                pointBackgroundColor: '#ffffff'
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
-                }
+        // Create Charts
+        salesChart = new Chart(document.getElementById('salesLineChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: ['July 1', 'July 2', 'July 3', 'July 4', 'July 5'], datasets: [{ label: 'Revenue', data: [1950, 6600, 1560, 2100, 5450], borderColor: '#a86bff' }] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
 
-                const barCanvas = document.getElementById('ordersBarChart');
-                if (barCanvas) {
-                    new Chart(barCanvas.getContext('2d'), {
-                        type: 'bar',
-                        data: {
-                            labels: ['Brake Pads', 'Engine Oil', 'Tires', 'Batteries', 'Spark Plugs'],
-                            datasets: [{
-                                label: 'Total Units Handled',
-                                data: [14, 22, 9, 5, 28],
-                                backgroundColor: 'rgba(0, 229, 255, 0.5)',
-                                borderColor: '#00e5ff',
-                                borderWidth: 1,
-                                borderRadius: 4
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
-                }
+        barChart = new Chart(document.getElementById('ordersBarChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: ['Brake Pads', 'Engine Oil', 'Tires', 'Batteries', 'Spark Plugs'], datasets: [{ label: 'Units', data: [14, 22, 9, 5, 28], backgroundColor: '#00e5ff' }] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
 
-                const pieCanvas = document.getElementById('ordersPieChart');
-                if (pieCanvas) {
-                    new Chart(pieCanvas.getContext('2d'), {
-                        type: 'pie',
-                        data: {
-                            labels: ['Shipped', 'Processing', 'Pending'],
-                            datasets: [{
-                                data: [3, 6, 3], 
-                                backgroundColor: ['rgba(76, 175, 80, 0.65)', 'rgba(255, 152, 0, 0.65)', 'rgba(244, 67, 54, 0.65)'],
-                                borderColor: '#090314',
-                                borderWidth: 2
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-                    });
-                }
-            }
-        } catch (err) { console.error("Charts failed:", err.message); }
+        pieChart = new Chart(document.getElementById('ordersPieChart').getContext('2d'), {
+            type: 'pie',
+            data: { labels: ['Loading'], datasets: [{ data: [1], backgroundColor: ['#555'] }] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else { init(); }
+    async function refreshCharts() {
+        try {
+            const response = await fetch('http://localhost:4000/api/v1/chart-data');            if (!response.ok) throw new Error("Failed to load chart data");
+            const data = await response.json(); 
+
+            // Update pie chart with real data
+            pieChart.data.labels = data.map(item => item.status);
+            pieChart.data.datasets[0].data = data.map(item => item.count);
+            pieChart.data.datasets[0].backgroundColor = ['#4caf50', '#ff9800', '#f44336', '#2196f3'];
+            pieChart.update();
+            console.log("Charts refreshed");
+        } catch (err) {
+            console.error("Refresh failed:", err);
+        }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") refreshCharts();
+    });
+
+    document.addEventListener('DOMContentLoaded', init);
 })();

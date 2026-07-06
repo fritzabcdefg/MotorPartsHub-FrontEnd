@@ -50,7 +50,7 @@ function updateHeaderNav() {
       navAuth.style.setProperty('display', 'inline-block', 'important');
     }
     if (navProfile) {
-      navProfile.style.setProperty('display', 'none', 'important'); /* Forces it to disappear */
+      navProfile.style.setProperty('display', 'none', 'important'); 
       navProfile.classList.remove('active');
     }
     if (navDashboard) navDashboard.style.setProperty('display', 'none', 'important');
@@ -59,16 +59,41 @@ function updateHeaderNav() {
     return;
   }
 
-  // ==========================================
+// ==========================================
   // LOGGED IN STATE
   // ==========================================
   const isAdmin = user.role === 'admin';
 
   if (navAuth) navAuth.style.setProperty('display', 'none', 'important');
   if (navProfile) {
-    navProfile.style.setProperty('display', 'inline-block', 'important'); /* Forces it to show up */
+    navProfile.style.setProperty('display', 'inline-block', 'important'); 
     if (dropdownMeta) {
-      dropdownMeta.textContent = `Logged in as ${user.name || 'Builder'}`;
+      // 1. Try getting the name from the current user session object
+      let displayName = user.name;
+      
+      // 2. Fallback: If session object is empty, look directly inside localStorage strings
+      if (!displayName) {
+        try {
+          const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+          displayName = localUser.name;
+        } catch (e) {
+          console.error("Error reading fallback name storage:", e);
+        }
+      }
+      
+      // 3. Fallback 2: If name still isn't found, cut out the prefix from their login email
+      if (!displayName && user.email) {
+        displayName = user.email.split('@')[0];
+      }
+      
+      // 4. Final placeholder fallback
+      if (!displayName) {
+        displayName = 'User';
+      }
+
+      // Isolate just the first word (first name)
+      const firstName = displayName.trim().split(' ')[0];
+      dropdownMeta.textContent = `Logged in as ${firstName}`;
     }
   }
 
@@ -81,18 +106,38 @@ function updateHeaderNav() {
   }
 }
 
-function initHeaderNav() {
-  if (window.headerNavInitialized) {
+  function initHeaderNav() {
+    if (window.headerNavInitialized) {
+      updateHeaderNav();
+      return;
+    }
+
+    window.headerNavInitialized = true;
+    if (window.User && typeof window.User.initSession === 'function') {
+      window.User.initSession();
+    }
     updateHeaderNav();
-    return;
+  
+  // ==========================================
+  // FAIL-SAFE: INJECT OVERRIDE STYLES FOR CLICK LOCK
+  // ==========================================
+  if (!document.getElementById('mph-header-overrides')) {
+    const style = document.createElement('style');
+    style.id = 'mph-header-overrides';
+    style.innerHTML = `
+      .nav-dropdown.active .dropdown-menu {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
-  window.headerNavInitialized = true;
-  if (window.User && typeof window.User.initSession === 'function') {
-    window.User.initSession();
-  }
-  updateHeaderNav();
-
+  // ==========================================
+  // CLICK AND ACTION HANDLERS
+  // ==========================================
   document.addEventListener('click', function (e) {
     const navProfile = document.getElementById('navProfile');
 
@@ -100,7 +145,7 @@ function initHeaderNav() {
     const profileTrigger = e.target.closest('.profile-trigger');
     if (profileTrigger) {
       e.preventDefault();
-      e.stopPropagation(); // Stops event bleeding so the menu stays locked open
+      e.stopPropagation(); 
       if (navProfile) {
         navProfile.classList.toggle('active');
       }
@@ -119,7 +164,7 @@ function initHeaderNav() {
       return;
     }
 
-    // 3. Click Away Dismissal
+    // 3. Click Away Dismissal (Only close if clicking OUTSIDE the entire profile block)
     if (navProfile && !navProfile.contains(e.target)) {
       navProfile.classList.remove('active');
     }
@@ -129,6 +174,7 @@ function initHeaderNav() {
   window.addEventListener('auth:changed', updateHeaderNav);
 }
 
+// Global execution hooks
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initHeaderNav);
 } else {

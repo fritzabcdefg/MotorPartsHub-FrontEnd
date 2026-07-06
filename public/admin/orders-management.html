@@ -63,11 +63,9 @@
         User.initSession(); 
         const token = User.getToken(); 
 
-        // 1. Fetch Master Logs
         api.get('/api/v1/orders', { headers: { 'Authorization': `Bearer ${token}` } }) 
         .then(res => { 
-            const orders = res.data.orders || []; 
-            
+            const orders = res.data || [];
             let html = `
             <table id="ordersTable" class="table">
                 <thead>
@@ -81,16 +79,16 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+               <tbody>
                     ${orders.map(o => `
                     <tr>
-                        <td>#${o.id}</td>
-                        <td><span style="color: #b3a1d9;">User Account #${o.customerName}</span></td>
-                        <td>${new Date(o.createdAt).toLocaleDateString()}</td>
-                        <td>₱${parseFloat(o.shipping || 0).toFixed(2)}</td>
-                        <td><strong style="color: #a86bff;">₱${parseFloat(o.totalPrice || 0).toFixed(2)}</strong></td>
+                        <td>#${o.orderinfo_id || 'N/A'}</td>
+                        <td><span style="color: #b3a1d9;">${o.customer_name || 'Unknown User'}</span></td>
+                        <td>${o.date_placed ? new Date(o.date_placed).toLocaleDateString() : 'N/A'}</td>
+                        <td>₱${parseFloat(o.shipping || 0).toFixed(2)}</td>                        
+                        <td><strong style="color: #a86bff;">₱${parseFloat(o.total || 0).toFixed(2)}</strong></td>
                         <td>
-                            <select class="status-select" data-order-id="${o.id}">
+                            <select class="status-select" data-order-id="${o.orderinfo_id}">
                                 <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
                                 <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
                                 <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
@@ -98,7 +96,7 @@
                             </select>
                         </td>
                         <td>
-                            <button class="btn-action-view open-details-btn" data-order-id="${o.id}">View Details</button>
+                            <button class="btn-action-view open-details-btn" data-order-id="${o.orderinfo_id}">View Details</button>
                         </td>
                     </tr>
                     `).join('')}

@@ -5,6 +5,26 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Register - MotorPartsHub</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* Styling to cleanly position the password show/hide action */
+    .password-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      bottom: 10px; /* Aligns with the bottom input padding layout */
+      background: none;
+      border: none;
+      color: #a86bff;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      user-select: none;
+    }
+  </style>
 </head>
 <body>
   <div id="header"></div>
@@ -12,22 +32,63 @@
     <main class="card">
       <h1>Create account</h1>
       <form id="registerForm">
-        <label for="name">Name</label>
-        <input id="name" type="text">
         <label for="email">Email</label>
-        <input id="email" type="email">
-        <label for="password">Password</label>
-        <input id="password" type="password">
-              <br></br>
+        <input id="email" type="email" required>
+        
+        <div class="password-container">
+          <label for="password">Password</label>
+          <input id="password" type="password" required>
+          <button type="button" id="togglePasswordBtn" class="toggle-password">Show</button>
+        </div>
+        <br><br>
+        
         <input type="submit" value="Register">
       </form>
       <p>Already have an account? <a href="login.html">Login here</a>.</p>
     </main>
   </div>
+  
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
-  <script>fetch('/header-guest.html').then(r=>r.text()).then(t=>{document.getElementById('header').innerHTML=t});</script>
+  
+  <script>
+    // 1. Load Guest Header
+    fetch('/header-guest.html').then(r=>r.text()).then(t=>{document.getElementById('header').innerHTML=t});
+
+    // 2. Password Visibility Toggle Logic
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+
+    togglePasswordBtn.addEventListener('click', function () {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            togglePasswordBtn.textContent = 'Hide';
+        } else {
+            passwordInput.type = 'password';
+            togglePasswordBtn.textContent = 'Show';
+        }
+    });
+
+    // 3. Form Submission Logic
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await axios.post('http://localhost:4000/api/v1/register', { email, password });
+            if(response.data.success) {
+                alert(response.data.message);
+                document.getElementById('registerForm').reset();
+                togglePasswordBtn.textContent = 'Show';
+                passwordInput.type = 'password';
+            }
+        } catch (error) {
+            alert(error.response?.data?.message || 'Registration failed.');
+        }
+    });
+  </script>
 </body>
 </html>

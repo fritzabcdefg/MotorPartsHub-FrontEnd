@@ -113,23 +113,27 @@
 
    <!-- MIDDLE SECTION MENU -->
     <div class="management-grid">
-      <a href="/admin/users-management.html" class="management-card">
+      <a href="/admin/users-management.html" class="management-card" data-endpoint="/api/v1/users" data-counter-id="userCount">
         <div class="menu-icon">👥</div>
         <div class="menu-info"><span class="menu-title">User Accounts</span><span class="menu-counter" id="userCount">0 Registered</span></div>
       </a>
-      <a href="/admin/inventory-management.html" class="management-card">
+      
+      <a href="/admin/inventory-management.html" class="management-card" data-endpoint="/api/v1/items" data-counter-id="inventoryCount">
         <div class="menu-icon">📦</div>
         <div class="menu-info"><span class="menu-title">Inventory Parts</span><span class="menu-counter" id="inventoryCount">0 Catalogued</span></div>
       </a>
-      <a href="/admin/orders-management.html" class="management-card">
+      
+      <a href="/admin/orders-management.html" class="management-card" data-endpoint="/api/v1/orders" data-counter-id="orderCount">
         <div class="menu-icon">📜</div>
         <div class="menu-info"><span class="menu-title">Order Ledger</span><span class="menu-counter" id="orderCount">0 Invoices</span></div>
       </a>
-      <a href="/admin/reviews-management.html" class="management-card">
+
+      <a href="/admin/reviews-management.html" class="management-card" data-endpoint="/api/v1/reviews" data-counter-id="reviewCount">
         <div class="menu-icon">⭐</div>
         <div class="menu-info"><span class="menu-title">User Feedback</span><span class="menu-counter" id="reviewCount">0 Submissions</span></div>
       </a>
-      <a href="/admin/categories-management.html" class="management-card">
+      
+      <a href="/admin/categories-management.html" class="management-card" data-endpoint="/api/v1/categories" data-counter-id="categoryCount">
         <div class="menu-icon">📁</div>
         <div class="menu-info"><span class="menu-title">Classification</span><span class="menu-counter" id="categoryCount">0 Branches</span></div>
       </a>
@@ -152,33 +156,181 @@
     </div>
   </main>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
   <script src="/js/dashboard.js"></script>
   <script src="/js/header.js"></script>
-  <script src="/js/app.js"></script>
+
   <script>
-    fetch('/header.html').then(r => r.text()).then(t => {
-        document.getElementById('header').innerHTML = t;
-        if (window.initHeaderNav) window.initHeaderNav();
-    });
+  (function() {
+      const API_BASE = 'http://localhost:3000'; // Kept from original
+      const API_HOST = 'http://localhost:4000'; // Backend base URL
 
-    // Fetch and display the stats
-    async function fetchDashboardMetrics() {
-        try {
-            const response = await fetch('/api/dashboard-stats'); 
-            const data = await response.json();
-            document.getElementById('totalOrders').innerText = data.totalOrders || 0;
-            document.getElementById('totalRevenue').innerText = 
-                parseFloat(data.totalRevenue || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
-        } catch (err) {
-            console.error("Error fetching stats:", err);
-        }
-    }
+      // ==========================================
+      // 1. HEADER INITIALIZATION
+      // ==========================================
+      fetch('/header.html').then(r => r.text()).then(t => {
+          document.getElementById('header').innerHTML = t;
+          if (window.initHeaderNav) window.initHeaderNav();
+      });
 
-    window.addEventListener('load', fetchDashboardMetrics);
+      // ==========================================
+      // 2. TOP STATS (Total Orders & Revenue)
+      // ==========================================
+      async function fetchDashboardMetrics() {
+          try {
+              const response = await fetch(`${API_HOST}/api/v1/dashboard-stats`);            
+              if (!response.ok) throw new Error(`Dashboard stats request failed: ${response.status}`);
+              
+              const text = await response.text();
+              const data = text ? JSON.parse(text) : {};
+              
+              document.getElementById('totalOrders').innerText = data.totalOrders || 0;
+              document.getElementById('totalRevenue').innerText = 
+                  parseFloat(data.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+          } catch (err) {
+              console.error('Error fetching stats:', err);
+              document.getElementById('totalOrders').innerText = '0';
+              document.getElementById('totalRevenue').innerText = '0.00';
+          }
+      }
+
+      // ==========================================
+      // 3. MIDDLE SECTION (Card Counts & Toasts)
+      // ==========================================
+      // Helper: safe parse and count extraction
+      // Helper: safe parse and count extraction
+      function extractCount(data) {
+          if (data == null) return 0;
+          if (Array.isArray(data)) return data.length;
+          
+          if (typeof data === 'object') {
+              if (typeof data.count === 'number') return data.count;
+              if (typeof data.total === 'number') return data.total;
+              if (typeof data.totalCount === 'number') return data.totalCount;
+              
+              // NEW: Automatically scan object keys to find the array (e.g., data.users)
+              for (let key in data) {
+                  if (Array.isArray(data[key])) {
+                      return data[key].length;
+                  }
+              }
+              
+              return 1; // Fallback if it's just a singular object
+          }
+          return 0;
+      }
+
+      // Toast notification setup
+      function showToast(msg) {
+          let t = document.getElementById('mph-count-toast');
+          if (!t) {
+              t = document.createElement('div');
+              t.id = 'mph-count-toast';
+              Object.assign(t.style, {
+                  position: 'fixed', right: '18px', bottom: '18px',
+                  background: '#0b0710', color: '#fff', padding: '10px 14px',
+                  borderRadius: '8px', border: '1px solid rgba(168,107,255,0.25)',
+                  zIndex: 99999, boxShadow: '0 6px 20px rgba(0,0,0,0.6)',
+                  transition: 'opacity 0.3s'
+              });
+              document.body.appendChild(t);
+          }
+          t.textContent = msg;
+          t.style.opacity = '1';
+          clearTimeout(t._hideTimer);
+          t._hideTimer = setTimeout(() => { t.style.opacity = '0'; }, 2500);
+      }
+
+      // Fetch Individual Count
+      async function fetchCount(endpoint) {
+          try {
+              const url = endpoint.startsWith('http') ? endpoint : API_HOST + endpoint;
+              console.log("Fetching from:", url); // Check F12 console to see where it's looking
+              
+              const res = await fetch(url, { credentials: 'include' });
+              if (!res.ok) {
+                  console.error(`API Error: ${res.status} for ${url}`);
+                  return 0;
+              }
+              
+              const text = await res.text();
+              let parsed = null;
+              try { parsed = text ? JSON.parse(text) : null; } catch(e) { parsed = null; }
+              
+              if (parsed !== null) return extractCount(parsed);
+              
+              const n = Number(text);
+              return Number.isFinite(n) ? n : 0;
+          } catch (err) {
+              console.error('Fetch Failed for:', endpoint, err.message);
+              return 0;
+          }
+      }
+
+      // Update the UI of a specific card
+      function updateCardUI(card, count) {
+          const counterEl = card.querySelector('.menu-counter') || document.getElementById(card.dataset.counterId);
+          if (counterEl) {
+              const suffix = counterEl.innerText.replace(/^[0-9,.\s]+/, '').trim();
+              counterEl.innerText = `${count.toLocaleString()}${suffix ? ' ' + suffix : ''}`;
+          }
+      }
+
+      // Click handler (also shows toast)
+      async function onCardClick(e) {
+          const card = e.currentTarget;
+          const endpoint = card.getAttribute('data-endpoint');
+          if (!endpoint) return;
+          
+          const count = await fetchCount(endpoint);
+          updateCardUI(card, count);
+          showToast(`${count.toLocaleString()} items at ${endpoint}`);
+      }
+
+      // Initialize Middle Cards
+      async function initCards() {
+          const cards = document.querySelectorAll('.management-card');
+          for (const card of cards) {
+              card.style.cursor = 'pointer';
+              card.removeEventListener('click', onCardClick);
+              card.addEventListener('click', onCardClick);
+
+              // Auto-fetch count on load
+              const endpoint = card.getAttribute('data-endpoint');
+              if (endpoint) {
+                  const count = await fetchCount(endpoint);
+                  updateCardUI(card, count);
+              }
+          }
+      }
+
+      // ==========================================
+      // 4. RUN ON LOAD & TAB SWITCH
+      // ==========================================
+      function runAll() {
+          fetchDashboardMetrics();
+          initCards();
+      }
+
+      if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', runAll);
+      } else {
+          runAll();
+      }
+
+      // Refresh when you switch back to the dashboard tab
+      document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") {
+              runAll();
+              if (typeof refreshCharts === 'function') {
+                  refreshCharts();
+              }
+          }
+      });
+  })();
   </script>
 </body>
 </html>
