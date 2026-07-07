@@ -1,4 +1,3 @@
-// Base cart utilities for MotorPartsHub
 (function (global) {
     const CART_KEY = 'mph_cart_v1';
 
@@ -38,22 +37,33 @@
     }
 
     function handleCheckoutClick(event) {
+        event.preventDefault();
         if (!hasActiveSession()) {
-            event.preventDefault();
+            // Not logged in — send to login
             window.location.href = '/login.html';
+            return;
         }
+        // Logged in — save cart snapshot for order-success.html receipt display,
+        // then navigate to checkout
+        const cart = getCart();
+        if (!cart || cart.length === 0) {
+            alert('Your cart is empty.');
+            return;
+        }
+        localStorage.setItem('mph_last_order', JSON.stringify(cart));
+        window.location.href = '/checkout.html'; // FIXED: was missing this line
     }
 
     function addItem(item) {
         const cart = getCart();
         const normalizedId = String(item.item_id ?? item.id ?? '');
         const normalizedItem = Object.assign({}, item, {
-            item_id: normalizedId,
-            id: normalizedId,
-            name: item.name || item.description || 'Unnamed item',
-            price: Number(item.price ?? item.sell_price ?? 0),
+            item_id:    normalizedId,
+            id:         normalizedId,
+            name:       item.name || item.description || 'Unnamed item',
+            price:      Number(item.price ?? item.sell_price ?? 0),
             sell_price: Number(item.sell_price ?? item.price ?? 0),
-            quantity: Number(item.quantity || 1)
+            quantity:   Number(item.quantity || 1)
         });
         const existing = cart.find(i => String(i.item_id ?? i.id ?? '') === normalizedId);
         if (existing) existing.quantity = (existing.quantity || 0) + (normalizedItem.quantity || 1);
@@ -95,7 +105,6 @@
         return false;
     }
 
-    // Update badge on page load and listen for storage changes
     document.addEventListener('DOMContentLoaded', function () {
         updateCartBadge();
         updateCheckoutState();

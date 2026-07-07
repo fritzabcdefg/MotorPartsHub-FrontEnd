@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout - MotorPartsHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .checkout-section-title {
+      color: var(--accent);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+    .order-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(168, 107, 255, 0.1);
+      font-size: 0.95rem;
+    }
+    .order-item-row:last-child { border-bottom: none; }
+    .order-item-name { color: #ffffff; font-weight: 600; flex: 1; }
+    .order-item-qty { color: #b3a1d9; margin: 0 16px; font-size: 0.85rem; }
+    .order-item-sub { color: #a86bff; font-weight: 700; }
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(168, 107, 255, 0.2);
+    }
+    .field-readonly {
+      background: rgba(168, 107, 255, 0.05);
+      border: 1px solid rgba(168, 107, 255, 0.15);
+      color: #b3a1d9;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      color: #b3a1d9;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .form-row { display: flex; gap: 14px; }
+    .form-row .form-group { flex: 1; }
+    #placeOrderBtn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    #placeOrderBtn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .empty-checkout {
+      text-align: center;
+      padding: 60px 20px;
+      color: #5a4b76;
+    }
+    .empty-checkout a { color: #a86bff; font-weight: 700; }
+    .payment-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(40, 167, 69, 0.1);
+      border: 1px solid rgba(40, 167, 69, 0.3);
+      color: #28a745;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="header"></div>
+
+  <main class="page-shell">
+    <div class="row">
+
+      <!-- Left Column: Shipping Info + Payment -->
+      <section class="col col-md-7">
+        <div class="card mb-4">
+          <h2 style="margin-bottom: 4px;">Checkout</h2>
+          <p class="muted mb-4">Review your order and confirm your shipping details.</p>
+
+          <!-- Shipping Details -->
+          <h3 class="checkout-section-title">Shipping Information</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <div class="field-readonly" id="shFname">—</div>
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <div class="field-readonly" id="shLname">—</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <div class="field-readonly" id="shPhone">—</div>
+          </div>
+          <div class="form-group">
+            <label>Address Line</label>
+            <div class="field-readonly" id="shAddress">—</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Town / City</label>
+              <div class="field-readonly" id="shTown">—</div>
+            </div>
+            <div class="form-group">
+              <label>Zip Code</label>
+              <div class="field-readonly" id="shZip">—</div>
+            </div>
+          </div>
+
+          <p class="muted" style="font-size: 0.82rem; margin-top: 4px;">
+            Wrong address? <a href="/profile.html" style="color: #a86bff;">Update it in your profile</a> first.
+          </p>
+
+          <hr style="border-color: rgba(168, 107, 255, 0.15); margin: 20px 0;">
+
+          <!-- Payment Method -->
+          <h3 class="checkout-section-title">Payment Method</h3>
+          <div class="payment-badge">
+            ✅ &nbsp; Cash on Delivery — Pay when your order arrives
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Order Summary + Place Order -->
+      <section class="col col-md-5">
+        <div class="card">
+          <h3 class="checkout-section-title">Order Summary</h3>
+
+          <!-- Item list rendered by JS -->
+          <div id="checkoutItemList">
+            <div class="empty-checkout">
+              Your cart is empty. <a href="/home.html">Go shopping</a>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <div class="summary-line">
+              <span class="muted">Subtotal</span>
+              <span id="checkoutSubtotal" style="color: #ffffff; font-weight: 600;">₱0.00</span>
+            </div>
+            <div class="summary-line">
+              <span class="muted">Shipping</span>
+              <span id="checkoutShipping" style="color: #ffffff; font-weight: 600;">₱200.00</span>
+            </div>
+            <div class="summary-total">
+              <span style="font-weight: 700; font-size: 1.05rem; color: #ffffff;">Total</span>
+              <span id="checkoutTotal" style="font-size: 1.4rem; font-weight: 800; color: #a86bff;">₱0.00</span>
+            </div>
+          </div>
+
+          <button id="placeOrderBtn" class="btn" disabled>Place Order</button>
+          <a href="/cart.html" class="btn secondary w-100 text-center" style="display: block; margin-top: 10px; text-align: center; padding: 10px;">
+            ← Back to Cart
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/js/user.js"></script>
+  <script src="/js/header.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/cart.js"></script>
+
+  <script>
+    // Attach JWT to every axios request
+    axios.interceptors.request.use((config) => {
+      const token = localStorage.getItem('token');
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+      return config;
+    });
+
+    // Load header
+    fetch('/header.html')
+      .then(r => r.text())
+      .then(t => {
+        document.getElementById('header').innerHTML = t;
+        if (window.initHeaderNav) window.initHeaderNav();
+      });
+
+    let customerData = null;
+    const SHIPPING_FEE = 200;
+
+    // ── 1. Render cart items into the order summary panel ──
+    function renderCheckoutItems() {
+      const cart = Cart.getCart();
+      const listEl = document.getElementById('checkoutItemList');
+
+      if (!cart || cart.length === 0) {
+        listEl.innerHTML = '<div class="empty-checkout">Your cart is empty. <a href="/home.html">Go shopping</a></div>';
+        document.getElementById('placeOrderBtn').disabled = true;
+        return;
+      }
+
+      let total = 0;
+      const rows = cart.map(item => {
+        const price = parseFloat(item.price || item.sell_price || 0);
+        const qty   = parseInt(item.quantity || 1);
+        const sub   = price * qty;
+        total += sub;
+        return `
+          <div class="order-item-row">
+            <span class="order-item-name">${item.name || 'Unknown Item'}</span>
+            <span class="order-item-qty">x${qty}</span>
+            <span class="order-item-sub">₱${sub.toFixed(2)}</span>
+          </div>`;
+      }).join('');
+
+      listEl.innerHTML = rows;
+      document.getElementById('checkoutSubtotal').textContent = '₱' + total.toFixed(2);
+      document.getElementById('checkoutShipping').textContent = '₱' + SHIPPING_FEE.toFixed(2);
+      document.getElementById('checkoutTotal').textContent    = '₱' + (total + SHIPPING_FEE).toFixed(2);
+
+      // Enable place order only if shipping data is also loaded
+      if (customerData) document.getElementById('placeOrderBtn').disabled = false;
+    }
+
+    // ── 2. Load shipping details from profile API ──
+    function loadShippingInfo() {
+      if (!Cart.hasActiveSession()) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      axios.get('/api/v1/users/profile')
+        .then(res => {
+          const { customerDetails } = res.data;
+
+          if (!customerDetails || !customerDetails.fname) {
+            alert('⚠️ Please complete your profile before checking out.');
+            window.location.href = '/profile.html';
+            return;
+          }
+
+          customerData = customerDetails;
+
+          document.getElementById('shFname').textContent   = customerDetails.fname        || '—';
+          document.getElementById('shLname').textContent   = customerDetails.lname        || '—';
+          document.getElementById('shPhone').textContent   = customerDetails.phone        || '—';
+          document.getElementById('shAddress').textContent = customerDetails.addressline  || '—';
+          document.getElementById('shTown').textContent    = customerDetails.town         || '—';
+          document.getElementById('shZip').textContent     = customerDetails.zipcode      || '—';
+
+          // Enable button now that we have both cart + shipping
+          const cart = Cart.getCart();
+          if (cart && cart.length > 0) {
+            document.getElementById('placeOrderBtn').disabled = false;
+          }
+        })
+        .catch(err => {
+          console.error('Failed to load shipping info:', err);
+          alert('Session expired. Please log in again.');
+          window.location.href = '/login.html';
+        });
+    }
+
+    // ── 3. Place order ──
+    document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+      const cart = Cart.getCart();
+      if (!cart || cart.length === 0) {
+        alert('Your cart is empty.');
+        return;
+      }
+      if (!customerData) {
+        alert('Shipping information not loaded. Please refresh.');
+        return;
+      }
+
+      const btn = document.getElementById('placeOrderBtn');
+      btn.disabled = true;
+      btn.textContent = 'Placing Order...';
+
+      const payload = {
+        items: cart.map(item => ({
+          item_id:  item.item_id || item.id,
+          quantity: parseInt(item.quantity || 1),
+          price:    parseFloat(item.price || item.sell_price || 0)
+        }))
+      };
+
+      try {
+        const res = await axios.post('/api/v1/orders/place', payload);
+
+        if (res.data.success) {
+          // Save a snapshot (with shipping fee) for the success page receipt
+          localStorage.setItem('mph_last_order', JSON.stringify({
+            items: cart,
+            shipping: res.data.shipping || SHIPPING_FEE
+          }));
+          // Clear cart after successful order
+          Cart.clearCart();
+          // Redirect to success page with order ID
+          window.location.href = `/order-success.html?orderId=${res.data.orderId}`;
+        }
+      } catch (err) {
+        alert(err.response?.data?.message || 'Failed to place order. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Place Order';
+      }
+    });
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCheckoutItems();
+      loadShippingInfo();
+    });
+  </script>
+</body>
+</html>

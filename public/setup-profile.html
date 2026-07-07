@@ -16,6 +16,12 @@
     input:focus, select:focus { border-color: #a86bff; outline: none; }
     input[type="submit"] { background: #a86bff; font-weight: bold; cursor: pointer; margin-top: 15px; }
     input[type="submit"]:hover { background: #b57fff; }
+    /* ADDED: avatar upload styling */
+    .avatar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    #avatarPreview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(168, 107, 255, 0.4); background: #120b24; }
+    .avatar-upload-label { display: inline-block; background: #120b24; border: 1px solid rgba(168, 107, 255, 0.3); color: #b3a1d9; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+    .avatar-upload-label:hover { border-color: #a86bff; color: #fff; }
+    #avatarUpload { display: none; }
   </style>
 </head>
 <body>
@@ -25,6 +31,16 @@
     <p>Your email has been verified! Let's complete your customer record file settings.</p>
     
     <form id="profileForm">
+
+      <!-- ADDED: avatar upload section -->
+      <div class="avatar-row">
+        <img id="avatarPreview" src="/img/default-avatar.png" alt="Profile Avatar">
+        <div>
+          <label for="avatarUpload" class="avatar-upload-label">Choose Photo</label>
+          <input type="file" id="avatarUpload" accept="image/*">
+        </div>
+      </div>
+
       <div class="form-row">
         <div class="form-group" style="flex: 0 0 100px;">
           <label for="title">Title</label>
@@ -73,8 +89,15 @@
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  
+
   <script>
+    // ADDED: attach JWT token to every axios request (matches profile.html)
+    axios.interceptors.request.use((config) => {
+      const token = localStorage.getItem('token');
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+      return config;
+    });
+
     // 1. Extract variables directly from URL parameters injected by backend redirect
     const urlParams = new URLSearchParams(window.location.search);
     let token = urlParams.get('token');
@@ -100,6 +123,21 @@
     // 3. Load Guest Header layout
     fetch('/header-guest.html').then(r=>r.text()).then(t=>{document.getElementById('header').innerHTML=t});
 
+    // ADDED: avatar file selection + live preview
+    let uploadedFile = null;
+    const avatarUpload = document.getElementById('avatarUpload');
+    const avatarPreview = document.getElementById('avatarPreview');
+
+    avatarUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            uploadedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => avatarPreview.src = e.target.result;
+            reader.readAsDataURL(file);
+        }
+    });
+
     // 4. Form Submission Logic
     document.getElementById('profileForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -110,23 +148,31 @@
             return;
         }
 
-        const profileData = {
-            userId: userId, // Now safely pulled from either the URL bar or active localStorage session
-            title: document.getElementById('title').value,
-            fname: document.getElementById('fname').value,
-            lname: document.getElementById('lname').value,
-            phone: document.getElementById('phone').value,
-            addressline: document.getElementById('addressline').value,
-            town: document.getElementById('town').value,
-            zipcode: document.getElementById('zipcode').value
-        };
+        // CHANGED: build FormData instead of a plain JSON object, so the avatar file
+        // can travel in the same request (multipart/form-data required for file uploads)
+        const formData = new FormData();
+        formData.append('userId', userId);
+        formData.append('title', document.getElementById('title').value);
+        formData.append('fname', document.getElementById('fname').value);
+        formData.append('lname', document.getElementById('lname').value);
+        formData.append('phone', document.getElementById('phone').value);
+        formData.append('addressline', document.getElementById('addressline').value);
+        formData.append('town', document.getElementById('town').value);
+        formData.append('zipcode', document.getElementById('zipcode').value);
+
+        if (uploadedFile) {
+            formData.append('avatar', uploadedFile);
+        }
 
         try {
-            const res = await axios.post('http://localhost:4000/api/v1/setup-profile', profileData);
+            // CHANGED: send formData with multipart header instead of JSON
+            const res = await axios.post('http://localhost:4000/api/v1/setup-profile', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
             if (res.data.success) {
                 // FIX: Instantly inject the newly filled name into local storage session data
                 const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
-                savedUser.name = `${profileData.fname} ${profileData.lname}`;
+                savedUser.name = `${document.getElementById('fname').value} ${document.getElementById('lname').value}`;
                 localStorage.setItem('user', JSON.stringify(savedUser));
 
                 // Force header updates to read the change immediately

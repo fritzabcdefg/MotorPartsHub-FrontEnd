@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Confirmed - MotorPartsHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .success-shell {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .success-card {
+      background: #090314;
+      border: 1px solid rgba(168, 107, 255, 0.25);
+      border-radius: 16px;
+      padding: 48px 40px;
+      max-width: 560px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+    }
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .success-card h1 {
+      color: #a86bff;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    .success-card p {
+      color: #b3a1d9;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .order-id-badge {
+      display: inline-block;
+      background: rgba(168, 107, 255, 0.12);
+      border: 1px solid rgba(168, 107, 255, 0.3);
+      color: #a86bff;
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 10px 24px;
+      border-radius: 8px;
+      margin: 16px 0 24px;
+      letter-spacing: 1px;
+    }
+    .mailtrap-notice {
+      background: rgba(40, 167, 69, 0.08);
+      border: 1px solid rgba(40, 167, 69, 0.25);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 20px 0;
+      color: #28a745;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      text-align: left;
+    }
+    .mailtrap-notice strong { display: block; margin-bottom: 4px; font-size: 0.92rem; }
+    .action-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+    .action-btns a { flex: 1; min-width: 140px; text-align: center; padding: 12px; }
+    .order-items-list {
+      text-align: left;
+      margin: 20px 0;
+      background: rgba(168, 107, 255, 0.04);
+      border: 1px solid rgba(168, 107, 255, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .order-items-list h4 {
+      color: #a86bff;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .order-item-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(168, 107, 255, 0.08);
+      font-size: 0.88rem;
+    }
+    .order-item-line:last-child { border-bottom: none; }
+    .order-item-line span:first-child { color: #ffffff; }
+    .order-item-line span:last-child { color: #a86bff; font-weight: 700; }
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 12px;
+      margin-top: 8px;
+      border-top: 1px solid rgba(168, 107, 255, 0.2);
+      font-weight: 800;
+      font-size: 1rem;
+    }
+    .total-line span:first-child { color: #ffffff; }
+    .total-line span:last-child { color: #a86bff; font-size: 1.15rem; }
+  </style>
+</head>
+<body>
+
+  <div id="header"></div>
+
+  <div class="success-shell">
+    <div class="success-card">
+      <span class="success-icon">🎉</span>
+      <h1>Order Confirmed!</h1>
+      <p>Your order has been placed successfully and is now being processed.</p>
+
+      <div class="order-id-badge" id="orderIdDisplay">Order #—</div>
+
+      <!-- Itemized receipt pulled from localStorage snapshot -->
+      <div class="order-items-list" id="receiptItems">
+        <h4>Items Ordered</h4>
+        <div id="receiptItemRows">—</div>
+        <div class="order-item-line">
+          <span>Shipping Fee</span>
+          <span id="receiptShipping">₱200.00</span>
+        </div>
+        <div class="total-line">
+          <span>Total Paid</span>
+          <span id="receiptTotal">₱0.00</span>
+        </div>
+      </div>
+
+      <!-- Mailtrap receipt notice -->
+      <div class="mailtrap-notice">
+        <strong>📧 Receipt sent to your email!</strong></div>
+
+      <p style="font-size: 0.85rem; color: #665588;">
+        Payment method: <strong style="color: #b3a1d9;">Cash on Delivery</strong> — pay when your package arrives.
+      </p>
+
+      <div class="action-btns">
+        <a href="/home.html" class="btn secondary">Continue Shopping</a>
+        <a href="/profile.html" class="btn">View My Orders</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/js/user.js"></script>
+  <script src="/js/header.js"></script>
+
+  <script>
+    fetch('/header.html')
+      .then(r => r.text())
+      .then(t => {
+        document.getElementById('header').innerHTML = t;
+        if (window.initHeaderNav) window.initHeaderNav();
+      });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Pull orderId from URL
+      const params   = new URLSearchParams(window.location.search);
+      const orderId  = params.get('orderId');
+
+      if (orderId) {
+        document.getElementById('orderIdDisplay').textContent = 'Order #' + orderId;
+      }
+
+      // Pull receipt snapshot saved by checkout.html before clearing cart
+      const snapshotRaw = localStorage.getItem('mph_last_order');
+      if (snapshotRaw) {
+        try {
+          const snapshot = JSON.parse(snapshotRaw);
+          const items    = snapshot.items || snapshot; // backward-compatible with old snapshot shape
+          const shipping = parseFloat(snapshot.shipping || 200);
+          const rowsEl   = document.getElementById('receiptItemRows');
+
+          let itemsTotal = 0;
+          rowsEl.innerHTML = items.map(item => {
+            const price = parseFloat(item.price || item.sell_price || 0);
+            const qty   = parseInt(item.quantity || 1);
+            const sub   = price * qty;
+            itemsTotal += sub;
+            return `
+              <div class="order-item-line">
+                <span>${item.name || 'Item'} x${qty}</span>
+                <span>₱${sub.toFixed(2)}</span>
+              </div>`;
+          }).join('');
+
+          document.getElementById('receiptShipping').textContent = '₱' + shipping.toFixed(2);
+          document.getElementById('receiptTotal').textContent    = '₱' + (itemsTotal + shipping).toFixed(2);
+
+          // Clean up snapshot after displaying
+          localStorage.removeItem('mph_last_order');
+        } catch (e) {
+          console.error('Could not parse order snapshot:', e);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

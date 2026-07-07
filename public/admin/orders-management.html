@@ -133,7 +133,9 @@
                     <div style="background: rgba(168, 107, 255, 0.05); border: 1px solid rgba(168, 107, 255, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                         <h4 style="margin: 0 0 8px 0; color: #b3a1d9; border-bottom: 1px dashed rgba(168, 107, 255, 0.2); padding-bottom: 4px;">Fulfillment Delivery Details</h4>
                         <p style="margin: 4px 0;"><strong>Recipient:</strong> <span style="color:#fff">${customer.customerName || 'N/A'}</span></p>
-                        <p style="margin: 4px 0;"><strong>Shipping Destination Address:</strong> <span style="color:#fff">${customer.shippingAddress || 'No address logged'}</span></p>
+                        <p style="margin: 4px 0;"><strong>Shipping Destination Address:</strong> <span style="color:#fff">${customer.shippingAddress || 'No address logged'}${customer.town ? ', ' + customer.town : ''}</span></p>
+                        <p style="margin: 4px 0;"><strong>Zip Code:</strong> <span style="color:#fff">${customer.zipcode || 'N/A'}</span></p>
+                        <p style="margin: 4px 0;"><strong>Contact Number:</strong> <span style="color:#fff">${customer.phone || 'N/A'}</span></p>
                     </div>
 
                     <h4 style="margin: 15px 0 8px 0; color: #b3a1d9;">Purchased Parts Breakdowns</h4>
