@@ -8,24 +8,84 @@
     body { background-color: #05020a; color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
     .panel-card { background-color: #090314; border: 1px solid rgba(168, 107, 255, 0.2); border-radius: 12px; padding: 24px; max-width: 1200px; margin: 0 auto; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); }
     .panel-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(168, 107, 255, 0.3); padding-bottom: 12px; margin-bottom: 20px; }
-    .btn-back { background: rgba(168, 107, 255, 0.1); border: 1px solid #a86bff; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+    .btn-back { background: rgba(168, 107, 255, 0.1); border: 1px solid #a86bff; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: 0.2s; cursor: pointer; }
     .btn-back:hover { background: #a86bff; }
     .table { width: 100% !important; color: #fff !important; margin-top: 15px; border-collapse: collapse; }
     .table th { background-color: rgba(168, 107, 255, 0.2) !important; color: #ffffff !important; padding: 12px !important; border-bottom: 2px solid #a86bff !important; text-align: left; }
-    .table td { padding: 12px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; }
+    .table td { padding: 12px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; vertical-align: middle; }
     .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: #b3a1d9 !important; margin: 12px 0; }
     .dataTables_wrapper .dataTables_filter input, .dataTables_wrapper .dataTables_length select { background-color: #140d26 !important; color: #fff !important; border: 1px solid rgba(168, 107, 255, 0.4) !important; padding: 6px; border-radius: 4px; }
     .dataTables_wrapper .dataTables_paginate .paginate_button { color: #fff !important; background: rgba(168, 107, 255, 0.1) !important; border: 1px solid rgba(168, 107, 255, 0.3) !important; margin-right: 4px; border-radius: 4px; }
     .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #a86bff !important; border-color: #a86bff !important; }
+
+    .btn-action { background: rgba(168, 107, 255, 0.15); border: 1px solid rgba(168, 107, 255, 0.5); color: #fff; padding: 5px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; margin-right: 4px; }
+    .btn-action:hover { background: #a86bff; }
+    .btn-action.danger { border-color: #ff6b6b; }
+    .btn-action.danger:hover { background: #ff6b6b; }
+
+    .muted { color: #9a8bc4; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-box { background: #0d0620; border: 1px solid rgba(168, 107, 255, 0.35); width: min(600px, 92vw); max-height: 88vh; overflow-y: auto; padding: 22px; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
+    .modal-box h3 { margin-top: 0; border-bottom: 1px solid rgba(168,107,255,0.25); padding-bottom: 10px; }
+    .form-grid { display: grid; gap: 12px; margin-top: 12px; }
+    .form-grid label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: #cfc2ef; }
+    .form-grid input, .form-grid textarea { background: #140d26; border: 1px solid rgba(168,107,255,0.4); color: #fff; padding: 8px; border-radius: 6px; font-size: 14px; }
+    .form-actions { margin-top: 18px; display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-primary { background: #a86bff; border: none; color: #fff; padding: 9px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 9px 18px; border-radius: 6px; cursor: pointer; }
+
+    .view-row { margin: 6px 0; }
+    .view-row strong { color: #cfc2ef; }
   </style>
 </head>
 <body>
   <main class="panel-card">
     <div class="panel-header-row">
       <h2>Parts Department Structure & Classifications</h2>
-        <a href="/dashboard.html" class="btn-back">← Back to Dashboard</a>    </div>
+      <a href="/admin/dashboard.html" class="btn-back">← Back to Dashboard</a>
+    </div>
+    <div style="margin-bottom:15px; display:flex; align-items:center; gap:16px;">
+      <button id="addCategoryBtn" class="btn-back" type="button">+ Add Category</button>
+      <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer;">
+        <input type="checkbox" id="showDeletedCheckbox">
+        Show deleted categories
+      </label>
+    </div>
     <div id="tableContainer">Loading Product Categories...</div>
   </main>
+
+  <!-- Create / Edit Modal -->
+  <div id="categoryFormOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <h3 id="formModalTitle">Add Category</h3>
+      <form id="categoryForm">
+        <div class="form-grid">
+          <label>Name
+            <input id="formName" type="text" required>
+          </label>
+          <label>Description
+            <textarea id="formDescription" rows="4"></textarea>
+          </label>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="formCancelBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Details Modal -->
+  <div id="viewModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Category Details</h3>
+      <div id="viewModalBody"></div>
+      <div class="form-actions">
+        <button type="button" id="viewCloseBtn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
@@ -33,25 +93,163 @@
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
   <script>
-    $(document).ready(function() {
-        User.initSession();
-        
-        // Updated to target your exact backend route: /api/categories
-        api.get('/api/categories')
+    let categoriesCache = [];
+    let editingId = null;
+
+    $(document).ready(function () {
+      User.initSession();
+      loadCategories();
+    });
+
+    function authHeaders() {
+      return { Authorization: `Bearer ${User.getToken()}` };
+    }
+
+    function loadCategories() {
+      const includeDeleted = $('#showDeletedCheckbox').is(':checked');
+      api.get('/api/v1/categories', { headers: authHeaders(), params: { includeDeleted } })
         .then(res => {
-            const categories = res.data.categories || res.data || [];
-            let html = `<table id="categoriesTable" class="table">
-                <thead><tr><th>Category ID</th><th>Department Name</th><th>Description Summary</th></tr></thead>
-                <tbody>${categories.map(c => `
-                    <tr>
-                        <td>${c.id || c._id}</td>
-                        <td><strong>${c.name || 'Unclassified Segment'}</strong></td>
-                        <td>${c.description || 'No system details catalogued.'}</td>
-                    </tr>`).join('')}</tbody></table>`;
-            $('#tableContainer').html(html);
-            $('#categoriesTable').DataTable({ "pageLength": 10 });
+          const data = res.data;
+          categoriesCache = Array.isArray(data) ? data : (data.categories || data.rows || []);
+          renderTable(categoriesCache);
         })
-        .catch(() => $('#tableContainer').html('<p style="color:red">Failed to synchronize category structure mapping.</p>'));
+        .catch(() => {
+          $('#tableContainer').html('<p style="color:red">Failed to synchronize category structure mapping.</p>');
+        });
+    }
+
+    function renderTable(categories) {
+      const rowsHtml = categories.map(c => `
+        <tr style="${c.is_deleted ? 'opacity:0.55;' : ''}">
+          <td>${c.category_id}</td>
+          <td><strong>${c.name || 'Unclassified Segment'}</strong>${c.is_deleted ? ' <span style="color:#ff6b6b; font-size:11px; border:1px solid #ff6b6b; padding:1px 6px; border-radius:4px;">Deleted</span>' : ''}</td>
+          <td>${c.description || 'No system details catalogued.'}</td>
+          <td>
+            <button class="btn-action btn-view-cat" data-id="${c.category_id}">View</button>
+            ${c.is_deleted
+              ? `<button class="btn-action btn-restore-cat" data-id="${c.category_id}">Restore</button>`
+              : `<button class="btn-action btn-edit-cat" data-id="${c.category_id}">Edit</button>
+                 <button class="btn-action danger btn-delete-cat" data-id="${c.category_id}">Delete</button>`
+            }
+          </td>
+        </tr>
+      `).join('');
+
+      const html = `
+        <table id="categoriesTable" class="table">
+          <thead><tr><th>Category ID</th><th>Department Name</th><th>Description Summary</th><th>Actions</th></tr></thead>
+          <tbody>${rowsHtml || '<tr><td colspan="4">No categories yet. Click "Add Category" to create one.</td></tr>'}</tbody>
+        </table>
+      `;
+      $('#tableContainer').html(html);
+      if ($.fn.DataTable.isDataTable('#categoriesTable')) {
+        $('#categoriesTable').DataTable().destroy();
+      }
+      $('#categoriesTable').DataTable({ pageLength: 10 });
+    }
+
+    // ---- Add / Edit form modal ----
+    function openFormModal(category) {
+      editingId = category ? category.category_id : null;
+      $('#formModalTitle').text(editingId ? 'Edit Category' : 'Add Category');
+      $('#formName').val(category?.name || '');
+      $('#formDescription').val(category?.description || '');
+      $('#categoryFormOverlay').css('display', 'flex');
+    }
+
+    function closeFormModal() {
+      $('#categoryFormOverlay').hide();
+      $('#categoryForm')[0].reset();
+      editingId = null;
+    }
+
+    function saveCategory() {
+      const payload = {
+        name: $('#formName').val().trim(),
+        description: $('#formDescription').val().trim()
+      };
+
+      const method = editingId ? 'put' : 'post';
+      const url = editingId ? `/api/v1/categories/${editingId}` : '/api/v1/categories';
+
+      api.request({
+        method,
+        url,
+        data: payload,
+        headers: { ...authHeaders() }
+      })
+      .then(() => {
+        closeFormModal();
+        loadCategories();
+      })
+      .catch(err => {
+        alert('Failed to save category: ' + (err.response?.data?.message || err.message || 'Unknown error'));
+      });
+    }
+
+    // ---- View details modal ----
+    function viewCategory(id) {
+      const category = categoriesCache.find(c => c.category_id == id);
+      if (!category) return;
+      $('#viewModalBody').html(`
+        <div class="view-row"><strong>Category ID:</strong> ${category.category_id}</div>
+        <div class="view-row"><strong>Name:</strong> ${category.name || ''}</div>
+        <div class="view-row"><strong>Description:</strong> ${category.description || '—'}</div>
+        <div class="view-row"><strong>Status:</strong> ${category.is_deleted ? 'Deleted' : 'Active'}</div>
+      `);
+      $('#viewModalOverlay').css('display', 'flex');
+    }
+
+    function deleteCategory(id) {
+      api.delete(`/api/v1/categories/${id}`, { headers: authHeaders() })
+        .then(() => loadCategories())
+        .catch(err => alert('Failed to delete category: ' + (err.response?.data?.message || err.message || 'Unknown error')));
+    }
+
+    function restoreCategory(id) {
+      api.put(`/api/v1/categories/${id}/restore`, {}, { headers: authHeaders() })
+        .then(() => loadCategories())
+        .catch(err => alert('Failed to restore category: ' + (err.response?.data?.message || err.message || 'Unknown error')));
+    }
+
+    // ---- Event delegation ----
+    $(document).on('click', '#addCategoryBtn', () => openFormModal(null));
+
+    $(document).on('click', '.btn-view-cat', function () {
+      viewCategory($(this).data('id'));
+    });
+
+    $(document).on('click', '.btn-edit-cat', function () {
+      const category = categoriesCache.find(c => c.category_id == $(this).data('id'));
+      if (category) openFormModal(category);
+    });
+
+    $(document).on('click', '.btn-delete-cat', function () {
+      const id = $(this).data('id');
+      if (confirm('Delete this category? It will be hidden from the active list but can be restored later.')) deleteCategory(id);
+    });
+
+    $(document).on('click', '.btn-restore-cat', function () {
+      const id = $(this).data('id');
+      if (confirm('Restore this category so it shows up in the active list again?')) restoreCategory(id);
+    });
+
+    $(document).on('change', '#showDeletedCheckbox', function () {
+      loadCategories();
+    });
+
+    $(document).on('click', '#formCancelBtn', closeFormModal);
+    $(document).on('click', '#categoryFormOverlay', function (e) {
+      if (e.target.id === 'categoryFormOverlay') closeFormModal();
+    });
+    $(document).on('submit', '#categoryForm', function (e) {
+      e.preventDefault();
+      saveCategory();
+    });
+
+    $(document).on('click', '#viewCloseBtn', () => $('#viewModalOverlay').hide());
+    $(document).on('click', '#viewModalOverlay', function (e) {
+      if (e.target.id === 'viewModalOverlay') $('#viewModalOverlay').hide();
     });
   </script>
 </body>

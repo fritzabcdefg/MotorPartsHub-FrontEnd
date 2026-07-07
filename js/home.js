@@ -1,9 +1,19 @@
+// ==========================================
+// GLOBAL API SCOPING SAFETY CHECK
+// ==========================================
+// If api was declared as a block-scoped constant, explicitly expose it to the window object
+if (!window.api && typeof api !== 'undefined') {
+    window.api = api;
+}
+
 $(document).ready(function () {
     const $searchInput = $('#partSearch');
     const $results = $('#searchResults');
     let debounceTimer = null;
-    const api = window.api;
-    const imageBase = 'http://localhost:4000';
+    const imageBase = 'http://localhost:4000'; // Adjust port/host to match base configuration
+
+    // Note: We removed "const api = window.api;" from here to allow 
+    // JavaScript to naturally look up the scope chain for the global 'api' instance.
 
     function clearResults() {
         $results.empty();
@@ -16,9 +26,9 @@ $(document).ready(function () {
         }
 
         const html = parts.map(part => `
-            <div class="search-item" data-id="${part.id}" data-name="${part.name}">
-                <span>${part.name}</span>
-                <strong>₱ ${Number(part.price).toFixed(2)}</strong>
+            <div class="search-item" data-id="${part.id || part.item_id}" data-name="${part.name || part.description}">
+                <span>${part.name || part.description}</span>
+                <strong>₱ ${Number(part.price || part.sell_price).toFixed(2)}</strong>
             </div>
         `).join('');
 
@@ -53,7 +63,7 @@ $(document).ready(function () {
 
     function navigateToPart(partId) {
         if (!partId) return;
-        window.location.href = `/item.html?partId=${partId}`;
+        window.location.href = `/catalog.html?partId=${partId}`;
     }
 
     $searchInput.on('keydown', function (event) {
@@ -63,7 +73,7 @@ $(document).ready(function () {
             clearTimeout(debounceTimer);
             searchParts(query, function (parts) {
                 if (parts && parts.length > 0) {
-                    navigateToPart(parts[0].id);
+                    navigateToPart(parts[0].id || parts[0].item_id);
                 }
             });
         }
@@ -74,6 +84,124 @@ $(document).ready(function () {
         navigateToPart(partId);
     });
 
+    // ==========================================
+    // DYNAMIC HOME PAGE FEATURED BESTSELLERS
+    // ==========================================
+    function loadFeaturedBestsellers() {
+        const $featuredGrid = $('#featuredPartsGrid');
+        if (!$featuredGrid.length) return;
+
+        api.get('/api/v1/items')
+            .then(({ data }) => {
+                // Handle different array structures from API response layers smoothly
+                const itemsList = data.items || data.rows || data || [];
+                
+                if (!itemsList.length) {
+                    $featuredGrid.html('<div class="catalog-empty" style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">No live parts available at this time.</div>');
+                    return;
+                }
+
+                // Take the top 4 items to display as Bestsellers
+                const topParts = itemsList.slice(0, 4);
+
+                const gridHtml = topParts.map((item, index) => {
+                    // Normalize standard column variations across backend iterations
+                    const itemId = item.id || item.item_id;
+                    const itemName = item.name || item.description || 'Unnamed Component';
+                    const itemPrice = item.sell_price ?? item.price ?? 0;
+                    
+                    // Format image location safely
+                    let imgUrl = item.img_url || item.img_path || '';
+                    if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('/')) {
+                        imgUrl = `${imageBase}/${imgUrl}`;
+                    }
+                    if (!imgUrl) imgUrl = '/img/placeholder-part.png';
+
+                    // Give badges look variations depending on position index loop 
+                    const tags = ['Bestseller', 'Hot Drop', 'Premium', 'Top Rated'];
+                    const currentTag = tags[index % tags.length];
+
+                    return `
+                        <article class="product-display-card">
+                          <span class="status-badge active bestseller-drop">${currentTag}</span>
+                          <div class="img-container product-card-img-link" data-item-id="${itemId}" style="cursor: pointer;">
+                            <img src="${imgUrl}" alt="${itemName}" class="product-img" loading="lazy">
+                          </div>
+                          <div class="product-info">
+                            <h3 class="product-card-name" style="margin-bottom: 8px; font-size: 1.1rem; font-weight: 600;">${itemName}</h3>
+                            <div class="product-meta" style="display: flex; justify-content: space-between; align-items: center;">
+                              <span class="part-price" style="color: var(--accent-violet); font-weight: 700;">₱ ${Number(itemPrice).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                              <span class="stock-indicator ${item.quantity > 0 ? 'in-stock' : 'low-stock'}">
+                                ${item.quantity > 0 ? 'Available' : 'Out of Stock'}
+                              </span>
+                            </div>
+                            <div class="featured-card-actions" style="display: flex; gap: 8px; margin-top: 16px;">
+                              <button class="btn add-to-cart-btn" type="button" 
+                                data-item-id="${itemId}" data-name="${itemName}" data-price="${itemPrice}" 
+                                ${item.quantity <= 0 ? 'disabled' : ''} style="flex: 1; padding: 8px;">
+                                ${item.quantity > 0 ? 'Add To Build' : 'Sold Out'}
+                              </button>
+                              <button class="btn secondary view-details-btn" data-item-id="${itemId}" type="button" style="padding: 8px 14px;">
+                                Details
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                    `;
+                }).join('');
+
+                $featuredGrid.html(gridHtml);
+            })
+            .catch(error => {
+                console.error('Failed to load real bestselling parts:', error);
+                $featuredGrid.html('<div class="catalog-empty" style="grid-column: 1/-1; text-align: center; color: #ff4a4a;">Failed to load featured inventory pipeline.</div>');
+            });
+    }
+
+    // Standard fallback backup grid generator for legacy #items anchor if loaded anywhere else
+    if ($('#items').length) {
+        api.get('/api/v1/items')
+            .then(({ data }) => {
+                const rows = data.rows || data.items || data || [];
+                const $items = $('#items');
+                $items.empty();
+
+                rows.forEach((value, key) => {
+                    if (key % 4 === 0) {
+                        const row = $('<div class="row"></div>');
+                        $items.append(row);
+                    }
+                    
+                    const id = value.item_id || value.id;
+                    const desc = value.description || value.name;
+
+                    const item = $(
+                        `<div class="col-md-3 mb-4">
+                            <div class="card h-100">
+                                <img src="${imageBase}${value.img_path || ''}" class="card-img-top" alt="${desc}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${desc}</h5>
+                                    <p class="card-text">₱ ${value.sell_price}</p>
+                                    <p class="card-text">
+                                        <small class="text-muted">Stock: ${value.quantity ?? 0}</small>
+                                    </p>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn btn-primary add-to-cart-btn" data-item-id="${id}" data-name="${desc}" data-price="${value.sell_price}" style="flex:1;">Add</button>
+                                        <button class="btn btn-outline-secondary view-details-btn" data-item-id="${id}">Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`
+                    );
+                    $items.children('.row').last().append(item);
+                });
+            });
+    }
+
+    // Execute home layout pipeline generators
+    loadFeaturedBestsellers();
+
+    // Event handler for quick adding inside home cards
     $(document).on('click', '.add-to-cart-btn', function (event) {
         event.preventDefault();
         if (!window.Cart || typeof window.Cart.addItem !== 'function') return;
@@ -88,43 +216,5 @@ $(document).ready(function () {
         };
 
         window.Cart.addItem(item);
-        alert('Added to cart!');
     });
-
-    if ($('#items').length) {
-        api.get('/api/v1/items')
-            .then(({ data }) => {
-                const rows = data.rows || [];
-                const $items = $('#items');
-                $items.empty();
-
-                rows.forEach((value, key) => {
-                    if (key % 4 === 0) {
-                        const row = $('<div class="row"></div>');
-                        $items.append(row);
-                    }
-
-                    const item = $(
-                        `<div class="col-md-3 mb-4">
-                            <div class="card h-100">
-                                <img src="${imageBase}${value.img_path}" class="card-img-top" alt="${value.description}">
-                                <div class="card-body">
-                                    <h5 class="card-title">${value.description}</h5>
-                                    <p class="card-text">₱ ${value.sell_price}</p>
-                                    <p class="card-text">
-                                        <small class="text-muted">Stock: ${value.quantity ?? 0}</small>
-                                    </p>
-                                    <a href="/item.html?partId=${value.item_id}" class="btn btn-primary">Details</a>
-                                </div>
-                            </div>
-                        </div>`
-                    );
-
-                    $items.children('.row').last().append(item);
-                });
-            })
-            .catch(error => {
-                console.error('Failed to load items', error);
-            });
-    }
 });

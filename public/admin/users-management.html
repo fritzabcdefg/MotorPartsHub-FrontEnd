@@ -27,7 +27,7 @@
   <main class="panel-card">
     <div class="panel-header-row">
       <h2>User Accounts Control Panel</h2>
-        <a href="/dashboard.html" class="btn-back">← Back to Dashboard</a>    </div>
+        <a href="/admin/dashboard.html" class="btn-back">← Back to Dashboard</a>    </div>
     <div id="tableContainer">Loading System Users Database...</div>
   </main>
 
@@ -50,10 +50,10 @@
 
         function renderTable(users) {
             let html = `<table id="usersTable" class="table">
-                <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>ID</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>${users.map(u => `
                     <tr>
-                        <td>${u.id || u._id}</td><td>${u.name}</td><td>${u.email}</td>
+                        <td>${u.id || u._id}</td><td>${u.email}</td>
                         <td>
                             <select class="role-select" data-user-id="${u.id || u._id}">
                                 <option value="user" ${u.role === 'user'?'selected':''}>User</option>

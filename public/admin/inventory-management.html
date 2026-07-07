@@ -8,24 +8,129 @@
     body { background-color: #05020a; color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
     .panel-card { background-color: #090314; border: 1px solid rgba(168, 107, 255, 0.2); border-radius: 12px; padding: 24px; max-width: 1200px; margin: 0 auto; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); }
     .panel-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(168, 107, 255, 0.3); padding-bottom: 12px; margin-bottom: 20px; }
-    .btn-back { background: rgba(168, 107, 255, 0.1); border: 1px solid #a86bff; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: 0.2s; }
+    .btn-back { background: rgba(168, 107, 255, 0.1); border: 1px solid #a86bff; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: 0.2s; cursor: pointer; }
     .btn-back:hover { background: #a86bff; }
     .table { width: 100% !important; color: #fff !important; margin-top: 15px; border-collapse: collapse; }
     .table th { background-color: rgba(168, 107, 255, 0.2) !important; color: #ffffff !important; padding: 12px !important; border-bottom: 2px solid #a86bff !important; text-align: left; }
-    .table td { padding: 12px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; }
+    .table td { padding: 12px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; vertical-align: middle; }
     .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: #b3a1d9 !important; margin: 12px 0; }
     .dataTables_wrapper .dataTables_filter input, .dataTables_wrapper .dataTables_length select { background-color: #140d26 !important; color: #fff !important; border: 1px solid rgba(168, 107, 255, 0.4) !important; padding: 6px; border-radius: 4px; }
     .dataTables_wrapper .dataTables_paginate .paginate_button { color: #fff !important; background: rgba(168, 107, 255, 0.1) !important; border: 1px solid rgba(168, 107, 255, 0.3) !important; margin-right: 4px; border-radius: 4px; }
     .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #a86bff !important; border-color: #a86bff !important; }
+
+    .btn-action { background: rgba(168, 107, 255, 0.15); border: 1px solid rgba(168, 107, 255, 0.5); color: #fff; padding: 5px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; margin-right: 4px; }
+    .btn-action:hover { background: #a86bff; }
+    .btn-action.danger { border-color: #ff6b6b; }
+    .btn-action.danger:hover { background: #ff6b6b; }
+
+    .muted { color: #9a8bc4; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-box { background: #0d0620; border: 1px solid rgba(168, 107, 255, 0.35); width: min(600px, 92vw); max-height: 88vh; overflow-y: auto; padding: 22px; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
+    .modal-box h3 { margin-top: 0; border-bottom: 1px solid rgba(168,107,255,0.25); padding-bottom: 10px; }
+    .form-grid { display: grid; gap: 12px; margin-top: 12px; }
+    .form-grid label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: #cfc2ef; }
+    .form-grid input, .form-grid textarea { background: #140d26; border: 1px solid rgba(168,107,255,0.4); color: #fff; padding: 8px; border-radius: 6px; font-size: 14px; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-actions { margin-top: 18px; display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-primary { background: #a86bff; border: none; color: #fff; padding: 9px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 9px 18px; border-radius: 6px; cursor: pointer; }
+
+    .photos-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .photo-thumb { position: relative; width: 70px; height: 55px; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid rgba(168,107,255,0.4); }
+    .photo-remove-btn { position: absolute; top: -6px; right: -6px; background: #ff4d4d; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; cursor: pointer; }
+
+    .view-row { margin: 6px 0; }
+    .view-row strong { color: #cfc2ef; }
+    .gallery-view img { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; margin: 4px; border: 1px solid rgba(168,107,255,0.4); }
   </style>
 </head>
 <body>
   <main class="panel-card">
     <div class="panel-header-row">
       <h2>Parts & Inventory Tracking</h2>
-        <a href="/dashboard.html" class="btn-back">← Back to Dashboard</a>    </div>
+      <a href="/admin/dashboard.html" class="btn-back">← Back to Dashboard</a>
+    </div>
+    <div style="margin-bottom:15px; display:flex; align-items:center; gap:16px;">
+      <button id="addItemBtn" class="btn-back" type="button">+ Add Item</button>
+      <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer;">
+        <input type="checkbox" id="showDeletedCheckbox">
+        Show deleted items
+      </label>
+    </div>
     <div id="tableContainer">Loading Parts Catalog...</div>
   </main>
+
+  <!-- Create / Edit Modal -->
+  <div id="itemFormOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <h3 id="formModalTitle">Add Item</h3>
+      <form id="itemForm">
+        <div class="form-grid">
+          <label>Name
+            <input id="formName" type="text" required>
+          </label>
+          <label>Description
+            <textarea id="formDescription" rows="3"></textarea>
+          </label>
+          <div class="form-row-2">
+            <label>Sell Price
+              <input id="formSellPrice" type="number" step="0.01" min="0" required>
+            </label>
+            <label>Cost Price
+              <input id="formCostPrice" type="number" step="0.01" min="0">
+            </label>
+          </div>
+          <div class="form-row-2">
+            <label>Quantity
+              <input id="formQuantity" type="number" min="0" step="1">
+            </label>
+            <label>Category
+              <select id="formCategoryId">
+                <option value="">— None —</option>
+              </select>
+            </label>
+          </div>
+          <label>Supplier Name
+            <input id="formSupplier" type="text">
+          </label>
+
+          <label>Main Image
+            <input id="formMainImage" type="file" accept="image/*">
+          </label>
+          <div>
+            <span class="muted">Current main image:</span>
+            <div id="currentMainImagePreview" style="margin-top:6px;"></div>
+          </div>
+
+          <label>Additional Photos (you can select multiple)
+            <input id="formPhotos" type="file" accept="image/*" multiple>
+          </label>
+          <div>
+            <span class="muted">Existing photos (click × to remove):</span>
+            <div id="existingPhotosGrid" class="photos-grid"></div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="formCancelBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Details Modal -->
+  <div id="viewModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Item Details</h3>
+      <div id="viewModalBody"></div>
+      <div class="form-actions">
+        <button type="button" id="viewCloseBtn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
@@ -33,28 +138,247 @@
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
   <script>
-    $(document).ready(function() {
-        User.initSession();
-        const token = User.getToken();
+    let itemsCache = [];
+    let categoriesCache = [];
+    let editingId = null;
+    let existingPhotos = [];
+    let photosMarkedForDeletion = [];
 
-        // Updated to point to your real /api/v1/parts endpoint
-        api.get('/api/v1/parts', { headers: { 'Authorization': `Bearer ${token}` } })
+    $(document).ready(function () {
+      User.initSession();
+      loadCategories();
+      loadItems();
+    });
+
+    function loadCategories() {
+      api.get('/api/v1/categories', { headers: authHeaders() })
         .then(res => {
-            const items = res.data.items || res.data.parts || res.data || [];
-            let html = `<table id="inventoryTable" class="table">
-                <thead><tr><th>Part ID</th><th>Item Name</th><th>Category</th><th>Price</th><th>Stock Qty</th></tr></thead>
-                <tbody>${items.map(i => `
-                    <tr>
-                        <td>${i.id || i._id}</td>
-                        <td><strong>${i.name || i.partName || 'Unnamed Part'}</strong></td>
-                        <td>${i.category || 'General'}</td>
-                        <td>₱${parseFloat(i.sell_price || 0).toFixed(2)}</td>
-                        <td>${i.stock ?? i.quantity ?? 0} units</td>
-                    </tr>`).join('')}</tbody></table>`;
-            $('#tableContainer').html(html);
-            $('#inventoryTable').DataTable({ "pageLength": 10 });
+          const data = res.data;
+          categoriesCache = Array.isArray(data) ? data : (data.categories || data.rows || []);
+          const options = categoriesCache.map(c => `<option value="${c.category_id}">${c.name}</option>`).join('');
+          $('#formCategoryId').html(`<option value="">— None —</option>${options}`);
         })
-        .catch(() => $('#tableContainer').html('<p style="color:red">Failed to connect to inventory systems.</p>'));
+        .catch((err) => {
+          console.error('Failed to load categories:', err.response?.data || err.message);
+          categoriesCache = [];
+        });
+    }
+
+    function categoryName(categoryId) {
+      if (!categoryId) return '—';
+      const match = categoriesCache.find(c => c.category_id == categoryId);
+      return match ? match.name : `#${categoryId}`;
+    }
+
+    function authHeaders() {
+      return { Authorization: `Bearer ${User.getToken()}` };
+    }
+
+    function loadItems() {
+      const includeDeleted = $('#showDeletedCheckbox').is(':checked');
+      api.get('/api/v1/items', { headers: authHeaders(), params: { includeDeleted } })
+        .then(res => {
+          itemsCache = res.data.items || [];
+          renderTable(itemsCache);
+        })
+        .catch(() => {
+          $('#tableContainer').html('<p style="color:red">Failed to connect to inventory systems.</p>');
+        });
+    }
+
+    function renderTable(items) {
+      const rowsHtml = items.map(i => `
+        <tr style="${i.is_deleted ? 'opacity:0.55;' : ''}">
+          <td>${i.id}</td>
+          <td>${i.img_url ? `<img src="${i.img_url}" style="width:50px;height:40px;object-fit:cover;border-radius:4px;">` : '—'}</td>
+          <td><strong>${i.name || ''}</strong>${i.is_deleted ? ' <span style="color:#ff6b6b; font-size:11px; border:1px solid #ff6b6b; padding:1px 6px; border-radius:4px;">Deleted</span>' : ''}</td>
+          <td>₱${parseFloat(i.sell_price || 0).toFixed(2)}</td>
+          <td>${i.quantity ?? 0}</td>
+          <td>
+            <button class="btn-action btn-view-item" data-id="${i.id}">View</button>
+            ${i.is_deleted
+              ? `<button class="btn-action btn-restore-item" data-id="${i.id}">Restore</button>`
+              : `<button class="btn-action btn-edit-item" data-id="${i.id}">Edit</button>
+                 <button class="btn-action danger btn-delete-item" data-id="${i.id}">Delete</button>`
+            }
+          </td>
+        </tr>
+      `).join('');
+
+      const html = `
+        <table id="inventoryTable" class="table">
+          <thead>
+            <tr><th>ID</th><th>Photo</th><th>Name</th><th>Price</th><th>Qty</th><th>Actions</th></tr>
+          </thead>
+          <tbody>${rowsHtml || '<tr><td colspan="6">No items yet. Click "Add Item" to create one.</td></tr>'}</tbody>
+        </table>
+      `;
+      $('#tableContainer').html(html);
+      if ($.fn.DataTable.isDataTable('#inventoryTable')) {
+        $('#inventoryTable').DataTable().destroy();
+      }
+      $('#inventoryTable').DataTable({ pageLength: 10 });
+    }
+
+    // ---- Add / Edit form modal ----
+    function openFormModal(item) {
+      editingId = item ? item.id : null;
+      existingPhotos = item && item.images ? [...item.images] : [];
+      photosMarkedForDeletion = [];
+
+      $('#formModalTitle').text(editingId ? 'Edit Item' : 'Add Item');
+      $('#formName').val(item?.name || '');
+      $('#formDescription').val(item?.description || '');
+      $('#formSellPrice').val(item?.sell_price ?? '');
+      $('#formCostPrice').val(item?.cost_price ?? '');
+      $('#formQuantity').val(item?.quantity ?? 0);
+      $('#formSupplier').val(item?.supplier_name || '');
+      $('#formCategoryId').val(item?.category_id ?? '');
+      $('#formMainImage').val('');
+      $('#formPhotos').val('');
+      $('#currentMainImagePreview').html(
+        item?.img_url ? `<img src="${item.img_url}" style="max-width:120px;max-height:90px;border-radius:6px;">` : '<span class="muted">No image</span>'
+      );
+      renderExistingPhotosGrid();
+      $('#itemFormOverlay').css('display', 'flex');
+    }
+
+    function renderExistingPhotosGrid() {
+      const visible = existingPhotos.filter(p => !photosMarkedForDeletion.includes(p.id));
+      const html = visible.map(p => `
+        <div class="photo-thumb" data-photo-id="${p.id}">
+          <img src="${p.url}">
+          <button type="button" class="photo-remove-btn" data-photo-id="${p.id}">×</button>
+        </div>
+      `).join('');
+      $('#existingPhotosGrid').html(html || '<span class="muted">No additional photos.</span>');
+    }
+
+    function closeFormModal() {
+      $('#itemFormOverlay').hide();
+      $('#itemForm')[0].reset();
+      editingId = null;
+      existingPhotos = [];
+      photosMarkedForDeletion = [];
+    }
+
+    function saveItem() {
+      const fd = new FormData();
+      fd.append('name', $('#formName').val().trim());
+      fd.append('description', $('#formDescription').val().trim());
+      fd.append('sell_price', $('#formSellPrice').val());
+      fd.append('cost_price', $('#formCostPrice').val());
+      fd.append('quantity', $('#formQuantity').val());
+      fd.append('supplier_name', $('#formSupplier').val().trim());
+      fd.append('category_id', $('#formCategoryId').val());
+
+      const mainFile = $('#formMainImage')[0].files[0];
+      if (mainFile) fd.append('image', mainFile);
+
+      const photoFiles = $('#formPhotos')[0].files;
+      Array.from(photoFiles).forEach(f => fd.append('photos', f));
+
+      if (editingId && photosMarkedForDeletion.length) {
+        fd.append('deletePhotoIds', JSON.stringify(photosMarkedForDeletion));
+      }
+
+      const method = editingId ? 'put' : 'post';
+      const url = editingId ? `/api/v1/items/${editingId}` : '/api/v1/items';
+
+      // Do NOT set Content-Type manually - the browser needs to add the multipart boundary itself.
+      api.request({
+        method,
+        url,
+        data: fd,
+        headers: { ...authHeaders() }
+      })
+      .then(() => {
+        closeFormModal();
+        loadItems();
+      })
+      .catch(err => {
+        alert('Failed to save item: ' + (err.response?.data?.message || err.message || 'Unknown error'));
+      });
+    }
+
+    // ---- View details modal ----
+    function viewItem(id) {
+      const item = itemsCache.find(i => i.id == id);
+      if (!item) return;
+      const gallery = (item.images || []).map(p => `<img src="${p.url}">`).join('');
+      $('#viewModalBody').html(`
+        <div class="view-row"><strong>ID:</strong> ${item.id}</div>
+        <div class="view-row"><strong>Name:</strong> ${item.name || ''}</div>
+        <div class="view-row"><strong>Description:</strong> ${item.description || '—'}</div>
+        <div class="view-row"><strong>Sell Price:</strong> ₱${parseFloat(item.sell_price || 0).toFixed(2)}</div>
+        <div class="view-row"><strong>Cost Price:</strong> ${item.cost_price != null ? '₱' + parseFloat(item.cost_price).toFixed(2) : '—'}</div>
+        <div class="view-row"><strong>Quantity:</strong> ${item.quantity ?? 0}</div>
+        <div class="view-row"><strong>Supplier:</strong> ${item.supplier_name || '—'}</div>
+        <div class="view-row"><strong>Category:</strong> ${categoryName(item.category_id)}</div>
+        <div class="view-row"><strong>Main Image:</strong></div>
+        ${item.img_url ? `<img src="${item.img_url}" style="max-width:160px;max-height:120px;border-radius:8px;">` : '<span class="muted">None</span>'}
+        <div class="view-row" style="margin-top:12px;"><strong>Additional Photos:</strong></div>
+        <div class="gallery-view">${gallery || '<span class="muted">None</span>'}</div>
+      `);
+      $('#viewModalOverlay').css('display', 'flex');
+    }
+
+    function deleteItem(id) {
+      api.delete(`/api/v1/items/${id}`, { headers: authHeaders() })
+        .then(() => loadItems())
+        .catch(err => alert('Failed to delete item: ' + (err.response?.data?.message || err.message || 'Unknown error')));
+    }
+
+    function restoreItem(id) {
+      api.put(`/api/v1/items/${id}/restore`, {}, { headers: authHeaders() })
+        .then(() => loadItems())
+        .catch(err => alert('Failed to restore item: ' + (err.response?.data?.message || err.message || 'Unknown error')));
+    }
+
+    // ---- Event delegation (elements are re-rendered, so bind on document) ----
+    $(document).on('click', '#addItemBtn', () => openFormModal(null));
+
+    $(document).on('click', '.btn-view-item', function () {
+      viewItem($(this).data('id'));
+    });
+
+    $(document).on('click', '.btn-edit-item', function () {
+      const item = itemsCache.find(i => i.id == $(this).data('id'));
+      if (item) openFormModal(item);
+    });
+
+    $(document).on('click', '.btn-delete-item', function () {
+      const id = $(this).data('id');
+      if (confirm('Delete this item? It will be hidden from the active inventory list but can be restored later.')) deleteItem(id);
+    });
+
+    $(document).on('click', '.btn-restore-item', function () {
+      const id = $(this).data('id');
+      if (confirm('Restore this item so it shows up in the active inventory again?')) restoreItem(id);
+    });
+
+    $(document).on('change', '#showDeletedCheckbox', function () {
+      loadItems();
+    });
+
+    $(document).on('click', '.photo-remove-btn', function () {
+      const id = parseInt($(this).data('photo-id'), 10);
+      photosMarkedForDeletion.push(id);
+      renderExistingPhotosGrid();
+    });
+
+    $(document).on('click', '#formCancelBtn', closeFormModal);
+    $(document).on('click', '#itemFormOverlay', function (e) {
+      if (e.target.id === 'itemFormOverlay') closeFormModal();
+    });
+    $(document).on('submit', '#itemForm', function (e) {
+      e.preventDefault();
+      saveItem();
+    });
+
+    $(document).on('click', '#viewCloseBtn', () => $('#viewModalOverlay').hide());
+    $(document).on('click', '#viewModalOverlay', function (e) {
+      if (e.target.id === 'viewModalOverlay') $('#viewModalOverlay').hide();
     });
   </script>
 </body>

@@ -56,7 +56,7 @@ const required = [
     'package.json',
     path.join('css','style.css'),
     path.join('html','home.html'),
-    path.join('html','item.html'),
+    path.join('html','catalog.html'),
     path.join('html','cart.html'),
     path.join('html','login.html'),
     path.join('html','register.html'),

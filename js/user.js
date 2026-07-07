@@ -119,7 +119,7 @@
                     setSession(user, token);
                     alert('Login successful!');
                     if (user.role === 'admin') {
-                        window.location.href = 'dashboard.html';
+                        window.location.href = '/admin/admin/dashboard.html';
                     } else {
                         window.location.href = 'home.html';
                     }

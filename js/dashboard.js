@@ -36,13 +36,27 @@
 
     async function refreshCharts() {
         try {
-            const response = await fetch('http://localhost:4000/api/v1/chart-data');            if (!response.ok) throw new Error("Failed to load chart data");
-            const data = await response.json(); 
+            const response = await fetch('http://localhost:4000/api/v1/chart-data');
+            if (!response.ok) throw new Error("Failed to load chart data");
+            const data = await response.json();
 
-            // Update pie chart with real data
-            pieChart.data.labels = data.map(item => item.status);
-            pieChart.data.datasets[0].data = data.map(item => item.count);
-            pieChart.data.datasets[0].backgroundColor = ['#4caf50', '#ff9800', '#f44336', '#2196f3'];
+            // ADDED: color map keyed by status name, with a fallback for null/blank statuses
+            const statusColors = {
+                'Processing': '#ff9800',
+                'Shipped':    '#2196f3',
+                'Delivered':  '#4caf50',
+                'Cancelled':  '#f44336',
+                'Unknown':    '#888888'
+            };
+
+            // FIXED: default blank/null status to 'Unknown' so the legend always has a label
+            const labels = data.map(item => item.status && item.status.trim() ? item.status : 'Unknown');
+            const counts  = data.map(item => item.count);
+            const colors  = labels.map(label => statusColors[label] || '#888888');
+
+            pieChart.data.labels = labels;
+            pieChart.data.datasets[0].data = counts;
+            pieChart.data.datasets[0].backgroundColor = colors;
             pieChart.update();
             console.log("Charts refreshed");
         } catch (err) {

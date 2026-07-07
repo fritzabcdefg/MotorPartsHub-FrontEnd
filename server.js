@@ -15,12 +15,12 @@ app.get(/^(?!\/api\/).*/, (req, res) => {
     return res.sendFile(path.join(__dirname, 'public', 'home.html'));
   }
 
-  if (requestedPath === '/item' || requestedPath === '/item.html') {
-    return res.sendFile(path.join(__dirname, 'public', 'item.html'));
+  if (requestedPath === '/item' || requestedPath === '/catalog.html') {
+    return res.sendFile(path.join(__dirname, 'public', 'catalog.html'));
   }
 
-  if (requestedPath === '/dashboard' || requestedPath === '/dashboard.html') {
-    return res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  if (requestedPath === '/dashboard' || requestedPath === '/admin/admin/dashboard.html') {
+    return res.sendFile(path.join(__dirname, 'admin', 'dashboard.html'));
   }
 
   if (requestedPath === '/login' || requestedPath === '/login.html') {

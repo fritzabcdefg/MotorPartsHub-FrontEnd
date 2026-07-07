@@ -6,18 +6,31 @@
   <title>Home - MotorPartsHub</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <div id="header">
     <nav class="site-header">
-      <div class="site-title">MotorPartsHub</div>
+      <div class="site-title">MotorParts<span>Hub</span></div>
+      
+      <form action="/catalog.html" method="GET" class="header-search-form">
+        <div class="header-search-wrapper">
+          <svg class="header-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" name="search" placeholder="Search parts..." autocomplete="off" class="header-search-input">
+          <button type="submit" class="header-search-btn">➔</button>
+        </div>
+      </form>
+
       <div class="nav-links" id="mainNav">
-        <a href="/home.html">Home</a>
-        <a href="/item.html">Parts</a>
+        <a href="/home.html" class="active">Home</a>
+        <a href="/catalog.html">Parts</a>
+        
         <a href="/cart.html" id="navCart" class="nav-cart-link">
           <div class="cart-icon-wrapper">
-            <svg class="cart-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="9" cy="21" r="1"></circle>
               <circle cx="20" cy="21" r="1"></circle>
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
@@ -26,74 +39,79 @@
           </div>
           <span class="cart-label">Cart</span>
         </a>
-        <a href="/dashboard.html" id="navDashboard" style="display:none">Dashboard</a>
+        
+        <a href="/admin/dashboard.html" id="navDashboard" style="display:none" class="nav-dash-item">Dashboard</a>
+        
         <div class="nav-dropdown" id="navProfile" style="display:none">
           <a href="javascript:void(0);" class="profile-trigger" title="Account Menu">
-            <svg class="profile-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <svg class="profile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
           </a>
-          <div class="dropdown-menu">
+          <div class="dropdown-menu-wrapper">
             <div class="dropdown-meta">Logged in as Builder</div>
+            <div class="dropdown-divider"></div>
             <a href="/profile.html">My Account</a>
             <div class="dropdown-divider"></div>
             <a href="/logout" id="navLogout" class="logout-item">Logout</a>
           </div>
         </div>
-        <a href="/login.html" id="navAuth" style="display:none">Login</a>
+        
+        <a href="/login.html" id="navAuth" style="display:none" class="login-action-btn">Login</a>
       </div>
     </nav>
   </div>
 
-  <!-- Main Layout Wrapper matching image_91060e.jpg workflow -->
   <main class="page-shell">
     
-    <!-- 1. Top Hero Section -->
-    <section class="hero-showcase card">
+    <section class="hero-showcase">
+      <div class="hero-showcase-glow"></div>
       <div class="hero-overlay-text">
-        <span class="eyebrow">High Performance Core</span>
+        <span class="eyebrow"><span class="pulse-ring"></span>High Performance Core</span>
         <h1>MIDNIGHT BUILDS</h1>
         <p class="lead">Engineered for the bold. High-torque components designed to keep your machine operating at peak potential long after dark.</p>
         <div class="hero-actions">
-          <a href="item.html" class="btn">Explore Inventory</a>
+          <a href="catalog.html" class="btn primary-action">Explore Inventory <span>➔</span></a>
         </div>
       </div>
     </section>
 
-    <!-- 2. Asymmetric 2x2 Category Grid inspired by image_91060e.jpg -->
     <section class="category-grid">
       <div class="category-card item-brakes">
+        <div class="card-gradient-overlay"></div>
         <div class="category-content">
-          <h3>BRAKE SYSTEMS</h3>
           <span class="badge-tag">Performance Verified</span>
-          <a href="item.html?cat=brakes" class="btn-link">View Category ➔</a>
+          <h3>BRAKE SYSTEMS</h3>
+          <a href="catalog.html?cat=1" class="btn-link">View Category <span>➔</span></a>
+        </div>
+      </div>
+      <div class="category-card item-fluids">
+        <div class="card-gradient-overlay"></div>
+        <div class="category-content">
+          <span class="badge-tag">Oils & Upkeep</span>
+          <h3>FLUIDS & MAINTENANCE</h3>
+          <a href="catalog.html?cat=2" class="btn-link">View Category <span>➔</span></a>
+        </div>
+      </div>
+      <div class="category-card item-wheels">
+        <div class="card-gradient-overlay"></div>
+        <div class="category-content">
+          <span class="badge-tag">Chains & Drivetrain</span>
+          <h3>WHEELS & DRIVE</h3>
+          <a href="catalog.html?cat=3" class="btn-link">View Category <span>➔</span></a>
         </div>
       </div>
       <div class="category-card item-suspension">
+        <div class="card-gradient-overlay"></div>
         <div class="category-content">
-          <h3>SUSPENSION</h3>
           <span class="badge-tag">Heavy Duty Coils</span>
-          <a href="item.html?cat=suspension" class="btn-link">View Category ➔</a>
-        </div>
-      </div>
-      <div class="category-card item-turbo">
-        <div class="category-content">
-          <h3>TURBO SYSTEMS</h3>
-          <span class="badge-tag">Boost Kits</span>
-          <a href="item.html?cat=turbo" class="btn-link">View Category ➔</a>
-        </div>
-      </div>
-      <div class="category-card item-lighting">
-        <div class="category-content">
-          <h3>HEADLIGHTS & DIODES</h3>
-          <span class="badge-tag">Aggressive Glow</span>
-          <a href="item.html?cat=lighting" class="btn-link">View Category ➔</a>
+          <h3>SUSPENSION</h3>
+          <a href="catalog.html?cat=7" class="btn-link">View Category <span>➔</span></a>
         </div>
       </div>
     </section>
 
-    <!-- 3. Breakout Mid Welcome Banner Section -->
     <section class="welcome-strip-banner">
       <div class="strip-container">
         <div class="strip-text">
@@ -101,115 +119,67 @@
           <p>Every single component featured in our core pipeline is styled with a dark core, premium violet trim, and persistent build quality meant to stand up to real stress testing.</p>
         </div>
         <div class="strip-graphic-placeholder">
-          <!-- Fits graphic position corresponding to the mechanic in image_91060e.jpg -->
           <div class="violet-glow-core"></div>
+          <div class="grid-mesh-lines"></div>
         </div>
       </div>
     </section>
 
-    <!-- 4. LIVE PARTS SHOWCASE SECTION (New Feature Addition) -->
+    <!-- FEATURED PARTS SECTION (Now Completely Dynamic) -->
     <section class="parts-showcase-section">
       <div class="section-header-bar">
-        <h2>FEATURED PARTS DISPATCH</h2>
-        <a href="item.html" class="btn secondary">View All Parts</a>
+        <h2>BESTSELLING PARTS DISPATCH</h2>
+        <a href="catalog.html" class="btn secondary-action">View All Parts</a>
       </div>
       
-      <div class="parts-product-grid">
-        <!-- Part Item 1 -->
-        <article class="card product-display-card">
-          <span class="status-badge active">New Drop</span>
-          <div class="img-container">
-            <img src="/img/placeholder-part1.jpg" alt="High Torque Coil" class="product-img">
-          </div>
-          <div class="product-info">
-            <h3>Hyper-Torque Ignition Coil</h3>
-            <div class="product-meta">
-              <span class="part-price">₱4,250.00</span>
-              <span class="muted">In Stock</span>
-            </div>
-            <button class="btn btn-sm w-100 mt-2 add-to-cart-btn" type="button" data-item-id="101" data-name="Hyper-Torque Ignition Coil" data-price="4250">Add To Build</button>
-          </div>
-        </article>
-
-        <!-- Part Item 2 -->
-        <article class="card product-display-card">
-          <span class="status-badge active">Hot</span>
-          <div class="img-container">
-            <img src="/img/placeholder-part2.jpg" alt="Premium Intake" class="product-img">
-          </div>
-          <div class="product-info">
-            <h3>Boosted Cold Air Intake Kit</h3>
-            <div class="product-meta">
-              <span class="part-price">₱8,900.00</span>
-              <span class="muted">3 Left</span>
-            </div>
-            <button class="btn btn-sm w-100 mt-2 add-to-cart-btn" type="button" data-item-id="102" data-name="Boosted Cold Air Intake Kit" data-price="8900">Add To Build</button>
-          </div>
-        </article>
-
-        <!-- Part Item 3 -->
-        <article class="card product-display-card">
-          <span class="status-badge active">In Stock</span>
-          <div class="img-container">
-            <img src="/img/placeholder-part3.jpg" alt="Ceramic Pads" class="product-img">
-          </div>
-          <div class="product-info">
-            <h3>Ceramic Compound Brake Pads</h3>
-            <div class="product-meta">
-              <span class="part-price">₱2,150.00</span>
-              <span class="muted">Premium</span>
-            </div>
-            <button class="btn btn-sm w-100 mt-2 add-to-cart-btn" type="button" data-item-id="103" data-name="Ceramic Compound Brake Pads" data-price="2150">Add To Build</button>
-          </div>
-        </article>
-
-        <!-- Part Item 4 -->
-        <article class="card product-display-card">
-          <span class="status-badge active">Bestseller</span>
-          <div class="img-container">
-            <img src="/img/placeholder-part4.jpg" alt="Fuel Filter" class="product-img">
-          </div>
-          <div class="product-info">
-            <h3>Billet Aluminum Fuel Filter</h3>
-            <div class="product-meta">
-              <span class="part-price">₱1,850.00</span>
-              <span class="muted">Verified</span>
-            </div>
-            <button class="btn btn-sm w-100 mt-2 add-to-cart-btn" type="button" data-item-id="104" data-name="Billet Aluminum Fuel Filter" data-price="1850">Add To Build</button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- 5. Quick Part Search Core Utility -->
-    <section class="search-card card">
-      <div class="search-shell">
-        <h2>Quick part search</h2>
-        <p>Type a component identifier to pull instant suggestion sets from the SQLite runtime index.</p>
-        <div class="search-field">
-          <input id="partSearch" type="text" placeholder="Search parts, e.g. brake pads" autocomplete="off">
-          <div id="searchResults" class="search-results"></div>
+      <!-- The JavaScript layer will inject real database items here dynamically -->
+      <div class="parts-product-grid" id="featuredPartsGrid">
+        <div class="catalog-loading-placeholder" style="color: var(--text-muted); padding: 2rem; text-align: center; width: 100%;">
+          Loading bestselling components...
         </div>
       </div>
     </section>
 
-    <!-- 6. Bottom Services & Infrastructure Matrix -->
     <section class="spotlight">
-      <article class="card spotlight-card">
+      <article class="spotlight-card data-core-card">
+        <div class="card-tag">System Spec</div>
         <h2>Persistence Core</h2>
-        <p>All data assets, client system profiles, and order configuration details are safely committed down to local SQLite tables.</p>
+        <p>All structured system parameters, user session graphs, and checkout matrices are safely serialized down into our persistent transaction layer.</p>
       </article>
-      <article class="card spotlight-card">
+      <article class="spotlight-card metric-display-card">
         <div class="stat-grid">
-          <div><strong>120+</strong><span>Parts Live</span></div>
-          <div><strong>35</strong><span>Elite Brands</span></div>
-          <div><strong>99%</strong><span>Response Rate</span></div>
+          <div class="stat-item">
+            <strong class="metric-number">120+</strong>
+            <span class="metric-label">Parts Live</span>
+          </div>
+          <div class="stat-item">
+            <strong class="metric-number">35</strong>
+            <span class="metric-label">Elite Brands</span>
+          </div>
+          <div class="stat-item">
+            <strong class="metric-number">99%</strong>
+            <span class="metric-label">Uptime Index</span>
+          </div>
         </div>
       </article>
     </section>
   </main>
 
+  <div class="item-modal-overlay" id="itemModalOverlay">
+    <div class="item-modal" id="itemModal">
+      <button class="item-modal-close" id="itemModalClose" aria-label="Close">&times;</button>
+      <div id="itemModalBody"></div>
+    </div>
+  </div>
+
   <div id="footer"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/cart.js"></script>
 
   <script src="/js/user.js"></script>
   <script src="/js/header.js"></script>
@@ -217,11 +187,10 @@
     if (window.initHeaderNav) window.initHeaderNav();
     fetch('/footer.html').then(r => r.text()).then(t => { document.getElementById('footer').innerHTML = t; });
   </script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="/js/api.js"></script>
-  <script src="/js/cart.js"></script>
+
   <script src="/js/home.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="/js/item.js"></script>
+</body>
+</html>
 </body>
 </html>

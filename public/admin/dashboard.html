@@ -164,9 +164,13 @@
   <script src="/js/header.js"></script>
 
   <script>
+    function authHeaders() {
+    const token = localStorage.getItem('token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+    }
   (function() {
-      const API_BASE = 'http://localhost:3000'; // Kept from original
-      const API_HOST = 'http://localhost:4000'; // Backend base URL
+      const API_BASE = 'http://localhost:3000'; 
+      const API_HOST = 'http://localhost:4000'; 
 
       // ==========================================
       // 1. HEADER INITIALIZATION
@@ -181,7 +185,7 @@
       // ==========================================
       async function fetchDashboardMetrics() {
           try {
-              const response = await fetch(`${API_HOST}/api/v1/dashboard-stats`);            
+              const response = await fetch(`${API_HOST}/api/v1/dashboard-stats`, { headers: authHeaders() });         
               if (!response.ok) throw new Error(`Dashboard stats request failed: ${response.status}`);
               
               const text = await response.text();
@@ -200,8 +204,6 @@
       // ==========================================
       // 3. MIDDLE SECTION (Card Counts & Toasts)
       // ==========================================
-      // Helper: safe parse and count extraction
-      // Helper: safe parse and count extraction
       function extractCount(data) {
           if (data == null) return 0;
           if (Array.isArray(data)) return data.length;
@@ -250,7 +252,7 @@
               const url = endpoint.startsWith('http') ? endpoint : API_HOST + endpoint;
               console.log("Fetching from:", url); // Check F12 console to see where it's looking
               
-              const res = await fetch(url, { credentials: 'include' });
+              const res = await fetch(url, { credentials: 'include', headers: authHeaders() });
               if (!res.ok) {
                   console.error(`API Error: ${res.status} for ${url}`);
                   return 0;
