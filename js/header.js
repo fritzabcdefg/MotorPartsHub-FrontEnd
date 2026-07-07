@@ -59,7 +59,7 @@ function updateHeaderNav() {
     return;
   }
 
-// ==========================================
+  // ==========================================
   // LOGGED IN STATE
   // ==========================================
   const isAdmin = user.role === 'admin';
@@ -68,10 +68,8 @@ function updateHeaderNav() {
   if (navProfile) {
     navProfile.style.setProperty('display', 'inline-block', 'important'); 
     if (dropdownMeta) {
-      // 1. Try getting the name from the current user session object
       let displayName = user.name;
       
-      // 2. Fallback: If session object is empty, look directly inside localStorage strings
       if (!displayName) {
         try {
           const localUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -81,17 +79,14 @@ function updateHeaderNav() {
         }
       }
       
-      // 3. Fallback 2: If name still isn't found, cut out the prefix from their login email
       if (!displayName && user.email) {
         displayName = user.email.split('@')[0];
       }
       
-      // 4. Final placeholder fallback
       if (!displayName) {
         displayName = 'User';
       }
 
-      // Isolate just the first word (first name)
       const firstName = displayName.trim().split(' ')[0];
       dropdownMeta.textContent = `Logged in as ${firstName}`;
     }
@@ -106,17 +101,17 @@ function updateHeaderNav() {
   }
 }
 
-  function initHeaderNav() {
-    if (window.headerNavInitialized) {
-      updateHeaderNav();
-      return;
-    }
-
-    window.headerNavInitialized = true;
-    if (window.User && typeof window.User.initSession === 'function') {
-      window.User.initSession();
-    }
+function initHeaderNav() {
+  if (window.headerNavInitialized) {
     updateHeaderNav();
+    return;
+  }
+
+  window.headerNavInitialized = true;
+  if (window.User && typeof window.User.initSession === 'function') {
+    window.User.initSession();
+  }
+  updateHeaderNav();
   
   // ==========================================
   // FAIL-SAFE: INJECT OVERRIDE STYLES FOR CLICK LOCK
@@ -125,7 +120,16 @@ function updateHeaderNav() {
     const style = document.createElement('style');
     style.id = 'mph-header-overrides';
     style.innerHTML = `
-      .nav-dropdown.active .dropdown-menu {
+      /* Force-kill structural CSS :hover declarations to avoid interface collision */
+      .nav-dropdown:hover .dropdown-menu,
+      .nav-dropdown:hover .dropdown-menu-wrapper {
+        display: none !important;
+      }
+      /* Reveal drop menus explicitly when the active flag is toggle-clicked */
+      .nav-dropdown.active .dropdown-menu,
+      .nav-dropdown.active .dropdown-menu-wrapper,
+      .nav-dropdown.active:hover .dropdown-menu,
+      .nav-dropdown.active:hover .dropdown-menu-wrapper {
         display: block !important;
         opacity: 1 !important;
         visibility: visible !important;

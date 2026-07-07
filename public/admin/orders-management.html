@@ -1,3 +1,5 @@
+<!-- This is Orders-Management.html -->
+
 <!doctype html>
 <html>
 <head>
@@ -28,6 +30,7 @@
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(168, 107, 255, 0.3); padding-bottom: 10px; margin-bottom: 15px; }
     .modal-close { background: none; border: none; color: #ff5555; font-size: 24px; cursor: pointer; font-weight: bold; }
     .modal-close:hover { color: #ff0000; }
+    .load-more-indicator { margin-top: 10px; text-align: center; color: #b3a1d9; font-size: 13px; }
     @keyframes fadeIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
@@ -59,13 +62,19 @@
   <script src="/js/user.js"></script>
 
   <script>
+    let ordersCache = [];
+    let visibleOrderCount = 10;
+    let isLoadingMoreOrders = false;
+
     $(document).ready(function() { 
         User.initSession(); 
         const token = User.getToken(); 
 
         api.get('/api/v1/orders', { headers: { 'Authorization': `Bearer ${token}` } }) 
         .then(res => { 
-            const orders = res.data || [];
+            ordersCache = res.data || [];
+            visibleOrderCount = Math.min(10, ordersCache.length);
+            const orders = ordersCache.slice(0, visibleOrderCount);
             let html = `
             <table id="ordersTable" class="table">
                 <thead>
@@ -96,15 +105,16 @@
                             </select>
                         </td>
                         <td>
-                            <button class="btn-action-view open-details-btn" data-order-id="${o.orderinfo_id}">View Details</button>
-                        </td>
+                          <button class="btn-action-view open-details-btn" data-order-id="${o.orderinfo_id}">View Details</button>
+                            <button class="btn-action-view download-receipt-btn" data-order-id="${o.orderinfo_id}" style="background: rgba(40, 167, 69, 0.2); border-color: #28a745; color: #71dd8a; margin-left: 6px;">📥 PDF Receipt</button>                        </td>
                     </tr>
                     `).join('')}
                 </tbody>
             </table>`; 
 
-            $('#tableContainer').html(html); 
-            $('#ordersTable').DataTable({ "pageLength": 10, "destroy": true }); 
+            $('#tableContainer').html(html + `${ordersCache.length > visibleOrderCount ? '<div class="load-more-indicator">Scroll to load more orders...</div>' : ''}`); 
+            $('#ordersTable').DataTable({ "paging": false, "searching": true, "ordering": true, "info": false, "destroy": true }); 
+            setupInfiniteScroll();
 
             // 2. Status Select Event Handler Configuration
             $('.status-select').change(function() { 
@@ -178,9 +188,86 @@
         }) 
         .catch(() => $('#tableContainer').html('<div style="color:red; padding:10px;">Failed to establish connection to XAMPP database transaction logs.</div>')); 
 
+        function setupInfiniteScroll() {
+            $(window).off('scroll.orderInfinite');
+            if (ordersCache.length <= visibleOrderCount) return;
+            $(window).on('scroll.orderInfinite', function () {
+                const distanceFromBottom = $(document).height() - ($(window).scrollTop() + $(window).height());
+                if (distanceFromBottom < 220 && !isLoadingMoreOrders) {
+                    isLoadingMoreOrders = true;
+                    visibleOrderCount = Math.min(visibleOrderCount + 10, ordersCache.length);
+                    const orders = ordersCache.slice(0, visibleOrderCount);
+                    let html = `
+                    <table id="ordersTable" class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer ID</th>
+                                <th>Date Placed</th>
+                                <th>Shipping Fee</th>
+                                <th>Total Charge</th>
+                                <th>Fulfillment Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                       <tbody>
+                            ${orders.map(o => `
+                            <tr>
+                                <td>#${o.orderinfo_id || 'N/A'}</td>
+                                <td><span style="color: #b3a1d9;">${o.customer_name || 'Unknown User'}</span></td>
+                                <td>${o.date_placed ? new Date(o.date_placed).toLocaleDateString() : 'N/A'}</td>
+                                <td>₱${parseFloat(o.shipping || 0).toFixed(2)}</td>                        
+                                <td><strong style="color: #a86bff;">₱${parseFloat(o.total || 0).toFixed(2)}</strong></td>
+                                <td>
+                                    <select class="status-select" data-order-id="${o.orderinfo_id}">
+                                        <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                        <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                        <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                        <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                    </select>
+                                </td>
+                                <td>
+                                  <button class="btn-action-view open-details-btn" data-order-id="${o.orderinfo_id}">View Details</button>
+                                    <button class="btn-action-view download-receipt-btn" data-order-id="${o.orderinfo_id}" style="background: rgba(40, 167, 69, 0.2); border-color: #28a745; color: #71dd8a; margin-left: 6px;">📥 PDF Receipt</button>                        </td>
+                            </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>`; 
+
+                    $('#tableContainer').html(html + `${ordersCache.length > visibleOrderCount ? '<div class="load-more-indicator">Scroll to load more orders...</div>' : ''}`);
+                    $('#ordersTable').DataTable({ "paging": false, "searching": true, "ordering": true, "info": false, "destroy": true });
+                    setTimeout(function () { isLoadingMoreOrders = false; }, 200);
+                }
+            });
+        }
+
         // 4. Close Modal Events
         $('#closeModalBtn, #detailsModal').click(function(e) {
             if (e.target === this) $('#detailsModal').css('display', 'none');
+        });
+        // Secure Binary Blob File Streaming Interceptor for PDF Receipt downloads
+        $(document).on('click', '.download-receipt-btn', function() {
+            const orderId = $(this).data('order-id');
+            const targetBtn = $(this);
+            
+            targetBtn.text('Generating...').prop('disabled', true);
+
+            api.get(`/api/v1/orders/${orderId}/receipt`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                responseType: 'blob' // Essential flag for non-corrupted PDF streaming
+            })
+            .then(res => {
+                const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.href = blobUrl;
+                downloadAnchor.setAttribute('download', `Receipt-Order-${orderId}.pdf`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+                window.URL.revokeObjectURL(blobUrl);
+            })
+            .catch(() => alert('Failed to generate printable PDF copy. Check active session rules.'))
+            .finally(() => targetBtn.text('📥 PDF Receipt').prop('disabled', false));
         });
     });
   </script>

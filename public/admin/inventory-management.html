@@ -31,7 +31,9 @@
     .form-grid { display: grid; gap: 12px; margin-top: 12px; }
     .form-grid label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: #cfc2ef; }
     .form-grid input, .form-grid textarea { background: #140d26; border: 1px solid rgba(168,107,255,0.4); color: #fff; padding: 8px; border-radius: 6px; font-size: 14px; }
+    .form-grid input.field-error, .form-grid textarea.field-error, .form-grid select.field-error { border-color: #ff6b6b !important; box-shadow: 0 0 0 1px rgba(255,107,107,0.18) inset; }
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-error { display: none; margin-top: 10px; padding: 8px 10px; border-radius: 6px; border: 1px solid #ff6b6b; background: rgba(255,107,107,0.12); color: #ffb6b6; font-size: 13px; }
     .form-actions { margin-top: 18px; display: flex; gap: 10px; justify-content: flex-end; }
     .btn-primary { background: #a86bff; border: none; color: #fff; padding: 9px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
     .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 9px 18px; border-radius: 6px; cursor: pointer; }
@@ -44,6 +46,7 @@
     .view-row { margin: 6px 0; }
     .view-row strong { color: #cfc2ef; }
     .gallery-view img { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; margin: 4px; border: 1px solid rgba(168,107,255,0.4); }
+    .load-more-indicator { margin-top: 10px; text-align: center; color: #b3a1d9; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -113,6 +116,7 @@
           </div>
         </div>
 
+        <div id="formErrorMessage" class="form-error"></div>
         <div class="form-actions">
           <button type="button" id="formCancelBtn" class="btn-secondary">Cancel</button>
           <button type="submit" class="btn-primary">Save Changes</button>
@@ -143,6 +147,8 @@
     let editingId = null;
     let existingPhotos = [];
     let photosMarkedForDeletion = [];
+    let visibleItemCount = 10;
+    let isLoadingMoreItems = false;
 
     $(document).ready(function () {
       User.initSession();
@@ -179,6 +185,7 @@
       api.get('/api/v1/items', { headers: authHeaders(), params: { includeDeleted } })
         .then(res => {
           itemsCache = res.data.items || [];
+          visibleItemCount = Math.min(10, itemsCache.length);
           renderTable(itemsCache);
         })
         .catch(() => {
@@ -187,7 +194,8 @@
     }
 
     function renderTable(items) {
-      const rowsHtml = items.map(i => `
+      const visibleItems = items.slice(0, visibleItemCount);
+      const rowsHtml = visibleItems.map(i => `
         <tr style="${i.is_deleted ? 'opacity:0.55;' : ''}">
           <td>${i.id}</td>
           <td>${i.img_url ? `<img src="${i.img_url}" style="width:50px;height:40px;object-fit:cover;border-radius:4px;">` : '—'}</td>
@@ -212,12 +220,28 @@
           </thead>
           <tbody>${rowsHtml || '<tr><td colspan="6">No items yet. Click "Add Item" to create one.</td></tr>'}</tbody>
         </table>
+        ${items.length > visibleItemCount ? '<div class="load-more-indicator">Scroll to load more items...</div>' : ''}
       `;
       $('#tableContainer').html(html);
       if ($.fn.DataTable.isDataTable('#inventoryTable')) {
         $('#inventoryTable').DataTable().destroy();
       }
-      $('#inventoryTable').DataTable({ pageLength: 10 });
+      $('#inventoryTable').DataTable({ paging: false, searching: true, ordering: true, info: false });
+      setupInfiniteScroll(items.length);
+    }
+
+    function setupInfiniteScroll(totalRows) {
+      $(window).off('scroll.inventoryInfinite');
+      if (totalRows <= visibleItemCount) return;
+      $(window).on('scroll.inventoryInfinite', function () {
+        const distanceFromBottom = $(document).height() - ($(window).scrollTop() + $(window).height());
+        if (distanceFromBottom < 220 && !isLoadingMoreItems) {
+          isLoadingMoreItems = true;
+          visibleItemCount = Math.min(visibleItemCount + 10, totalRows);
+          renderTable(itemsCache);
+          setTimeout(function () { isLoadingMoreItems = false; }, 200);
+        }
+      });
     }
 
     // ---- Add / Edit form modal ----
@@ -225,6 +249,7 @@
       editingId = item ? item.id : null;
       existingPhotos = item && item.images ? [...item.images] : [];
       photosMarkedForDeletion = [];
+      clearFormErrors($('#itemForm'));
 
       $('#formModalTitle').text(editingId ? 'Edit Item' : 'Add Item');
       $('#formName').val(item?.name || '');
@@ -257,9 +282,54 @@
     function closeFormModal() {
       $('#itemFormOverlay').hide();
       $('#itemForm')[0].reset();
+      clearFormErrors($('#itemForm'));
       editingId = null;
       existingPhotos = [];
       photosMarkedForDeletion = [];
+    }
+
+    function clearFormErrors($form) {
+      $form.find('.field-error').removeClass('field-error');
+      $form.find('#formErrorMessage').hide().text('');
+    }
+
+    function validateItemForm($form) {
+      clearFormErrors($form);
+      const errors = [];
+      const name = $form.find('#formName').val().trim();
+      const sellPrice = $form.find('#formSellPrice').val().trim();
+      const costPrice = $form.find('#formCostPrice').val().trim();
+      const quantity = $form.find('#formQuantity').val().trim();
+
+      if (!name) {
+        errors.push('Item name is required.');
+        $form.find('#formName').addClass('field-error');
+      }
+
+      if (!sellPrice) {
+        errors.push('Sell price is required.');
+        $form.find('#formSellPrice').addClass('field-error');
+      } else if (Number.isNaN(Number(sellPrice)) || Number(sellPrice) < 0) {
+        errors.push('Sell price must be a valid non-negative number.');
+        $form.find('#formSellPrice').addClass('field-error');
+      }
+
+      if (costPrice && (Number.isNaN(Number(costPrice)) || Number(costPrice) < 0)) {
+        errors.push('Cost price must be a valid non-negative number.');
+        $form.find('#formCostPrice').addClass('field-error');
+      }
+
+      if (quantity && (Number.isNaN(Number(quantity)) || Number(quantity) < 0)) {
+        errors.push('Quantity must be a valid non-negative number.');
+        $form.find('#formQuantity').addClass('field-error');
+      }
+
+      if (errors.length) {
+        $form.find('#formErrorMessage').text(errors[0]).show();
+        return false;
+      }
+
+      return true;
     }
 
     function saveItem() {
@@ -373,6 +443,9 @@
     });
     $(document).on('submit', '#itemForm', function (e) {
       e.preventDefault();
+      if (!validateItemForm($(this))) {
+        return;
+      }
       saveItem();
     });
 

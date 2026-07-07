@@ -6,6 +6,65 @@
   <title>Profile - MotorPartsHub</title>
   <!-- Custom Midnight Violet Stylesheet -->
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Compact utility styles for the side order table */
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+    .orders-table th {
+      color: var(--accent, #a86bff);
+      border-bottom: 1px solid rgba(168, 107, 255, 0.2);
+      padding: 6px;
+      text-align: left;
+    }
+    .orders-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: middle;
+    }
+    .action-btn-group {
+      display: flex;
+      gap: 4px;
+      justify-content: flex-end;
+    }
+    .btn-xs {
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    /* Modal Styles */
+    .portal-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+    .portal-modal-content {
+      background: #1a1625;
+      border: 1px solid #a86bff;
+      padding: 20px;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+      border-radius: 6px;
+    }
+    .close-modal-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
@@ -16,7 +75,7 @@
   <main class="page-shell">
     <div class="row">
       
-      <!-- Left Column: User Account Banner Card -->
+      <!-- Left Column: User Account Banner Card & Orders Table -->
       <section class="col col-md-4">
         <div class="card text-center mb-4">
           <div style="display: flex; flex-direction: column; align-items: center;">
@@ -36,17 +95,39 @@
             <span id="badgeActive" class="status-badge active">Active</span>
           </div>
         </div>
+
+        <!-- Orders Placement Section Below Profile Context -->
+        <div class="card">
+          <h3 style="color: var(--accent); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Order History</h3>
+          <div id="ordersContainer" style="max-height: 400px; overflow-y: auto;">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+                <tr>
+                  <td colspan="4" style="text-align: center;" class="muted">Loading orders...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- Right Column: Profile Root Form Context -->
       <section class="col col-md-8">
         <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h1 style="margin: 0;">Account Details</h1>
-          <button type="button" id="toggleEditBtn" class="btn btn-outline" style="padding: 5px 15px; cursor: pointer;">Edit Profile</button>
-        </div>          
-        <p class="muted mb-4">Manage your builder credentials and default transport routing information below.</p>
-                  
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0;">Account Details</h1>
+            <button type="button" id="toggleEditBtn" class="btn btn-outline" style="padding: 5px 15px; cursor: pointer;">Edit Profile</button>
+          </div>          
+          <p class="muted mb-4">Manage your builder credentials and default transport routing information below.</p>
+                    
           <!-- Dynamic Content Root Targeted by user.js -->
           <div id="profileRoot">
             <form id="profileForm">
@@ -122,6 +203,14 @@
     </div>
   </main>
 
+  <!-- Dynamic Content Modal View Overlay (Details & Reviews) -->
+  <div id="portalModal" class="portal-modal">
+    <div class="portal-modal-content">
+      <button class="close-modal-btn" onclick="closePortalModal()">&times;</button>
+      <div id="modalPortalTarget"></div>
+    </div>
+  </div>
+
   <!-- Core Script Implementations & Dependency Initializations -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -140,13 +229,6 @@
   
   <!-- Consolidated Flowchart Logic Controller Block -->
 <script>
-  // Attach JWT token to every axios request
-  axios.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-  });
-
   // Global state parameters tracking user changes
   let isEditMode = false;
   let currentUserId = null;
@@ -162,9 +244,6 @@
     const avatarUpload = document.getElementById('avatarUpload');
     const avatarPreview = document.getElementById('avatarPreview');
     const profileForm = document.getElementById('profileForm');
-    const loadOrdersBtn = document.getElementById('loadOrdersBtn');
-    const ordersContainer = document.getElementById('ordersContainer');
-    const tableBody = document.getElementById('ordersTableBody');
     const inputs = document.querySelectorAll('.profile-field, select#title');
 
     // --- 2. Initial Data Load: Pull from DB into View Mode (Default) ---
@@ -174,10 +253,12 @@
 
         if (user) {
           currentUserId = user.id;
-          // CHANGED: email replaces username; password intentionally left blank
           document.getElementById('email').value = user.email || '';
           document.getElementById('displayEmail').innerText = user.email || '';
           document.getElementById('badgeRole').innerText = user.role || 'User';
+
+          // Automatically trigger loading user specific orders upon retrieving identity
+          loadOrderHistory(user.id);
         }
 
         if (customerDetails) {
@@ -189,7 +270,6 @@
           document.getElementById('town').value = customerDetails.town || '';
           document.getElementById('zipcode').value = customerDetails.zipcode || '';
 
-          // CHANGED: display name built from customers fname/lname, not users.name
           const fullName = `${customerDetails.fname || ''} ${customerDetails.lname || ''}`.trim();
           document.getElementById('displayUserName').innerText = fullName || 'Builder';
 
@@ -210,7 +290,6 @@
         if (window.initHeaderNav) window.initHeaderNav();
       });
 
-    // ADDED: snapshot of original DB values, restored on cancel
     let originalData = {};
 
     function snapshotFields() {
@@ -227,15 +306,17 @@
     }
 
     function restoreFields() {
-      document.getElementById('title').value       = originalData.title       || 'Mr.';
-      document.getElementById('fname').value       = originalData.fname       || '';
-      document.getElementById('lname').value       = originalData.lname       || '';
-      document.getElementById('phone').value       = originalData.phone       || '';
-      document.getElementById('addressline').value = originalData.addressline || '';
-      document.getElementById('town').value        = originalData.town        || '';
-      document.getElementById('zipcode').value     = originalData.zipcode     || '';
-      avatarPreview.src                            = originalData.avatar;
-      uploadedFile = null; // discard any staged file
+      if (originalData.title) {
+        document.getElementById('title').value       = originalData.title;
+        document.getElementById('fname').value       = originalData.fname;
+        document.getElementById('lname').value       = originalData.lname;
+        document.getElementById('phone').value       = originalData.phone;
+        document.getElementById('addressline').value = originalData.addressline;
+        document.getElementById('town').value        = originalData.town;
+        document.getElementById('zipcode').value     = originalData.zipcode;
+        avatarPreview.src                            = originalData.avatar;
+      }
+      uploadedFile = null; 
     }
 
     // --- 3. View / Edit State Toggle Engine ---
@@ -247,10 +328,10 @@
       toggleEditBtn.style.display  = editActive ? 'none'         : 'block';
 
       if (editActive) {
-        snapshotFields(); // ADDED: take snapshot the moment edit mode opens
+        snapshotFields(); 
       } else {
-        restoreFields();  // ADDED: revert all fields to snapshot on cancel
-        document.getElementById('password').value = ''; // always clear password on exit
+        restoreFields();  
+        document.getElementById('password').value = ''; 
       }
     }
 
@@ -285,7 +366,6 @@
         formData.append('town', document.getElementById('town').value);
         formData.append('zipcode', document.getElementById('zipcode').value);
 
-        // ADDED: only send password if user actually typed a new one
         const newPassword = document.getElementById('password').value.trim();
         if (newPassword) {
           formData.append('password', newPassword);
@@ -300,62 +380,147 @@
             headers: { 'Content-Type': 'multipart/form-data' }
           });
 
-        if (res.data.success) {
-          alert('Profile updated successfully!');
-          document.getElementById('password').value = '';
-          toggleMode(false);
-          snapshotFields(); 
-        }
+          if (res.data.success) {
+            alert('Profile updated successfully!');
+            document.getElementById('password').value = '';
+            toggleMode(false);
+            snapshotFields(); 
+          }
         } catch (err) {
           alert(err.response?.data?.message || 'Failed saving profile data changes.');
         }
       });
     }
 
-    // --- 6. Order History Render Engine ---
-    if (loadOrdersBtn) {
-      loadOrdersBtn.addEventListener('click', async () => {
-        if (ordersContainer.style.display === 'block') {
-          ordersContainer.style.display = 'none';
+    // --- 6. Order History Data Engine Fetcher ---
+    async function loadOrderHistory(userId) {
+      const tableBody = document.getElementById('ordersTableBody');
+      try {
+        const res = await axios.get(`/api/v1/orders/my-orders?userId=${currentUserId}`);        
+        const orders = res.data.orders;
+
+        tableBody.innerHTML = '';
+        if (!orders || orders.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;" class="muted">No orders found.</td></tr>';
           return;
         }
 
-        try {
-          const res = await axios.get(`/api/orders/my-orders?userId=${currentUserId}`);
-          const orders = res.data.orders;
+        orders.forEach(order => {
+          // Display Review option strictly IF DELIVERED
+          const reviewBtn = order.status === 'Delivered'
+            ? `<button class="btn btn-xs btn-outline" onclick="openReviewModal(${order.orderinfo_id})">Review</button>`
+            : '';
 
-          tableBody.innerHTML = '';
-          if (!orders || orders.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No orders found.</td></tr>';
-          } else {
-            orders.forEach(order => {
-              const actionBtn = order.status === 'Delivered'
-                ? `<button class="btn btn-sm btn-outline" onclick="openReviewModal(${order.orderinfo_id})">Leave Review</button>`
-                : `<span class="muted">N/A</span>`;
-
-              tableBody.innerHTML += `
-                <tr>
-                  <td>#${order.orderinfo_id}</td>
-                  <td>${order.date_placed}</td>
-                  <td>₱${order.total}</td>
-                  <td><span class="status-badge">${order.status}</span></td>
-                  <td>${actionBtn}</td>
-                </tr>
-              `;
-            });
-          }
-          ordersContainer.style.width = "100%"; // FIXED: was style.with (typo)
-          ordersContainer.style.display = 'block';
-        } catch (err) {
-          alert('Failed to load order history records.');
-        }
-      });
+          tableBody.innerHTML += `
+            <tr>
+              <td>#${order.orderinfo_id}</td>
+              <td>₱${parseFloat(order.total).toFixed(2)}</td>
+              <td><span class="status-badge" style="font-size:0.75rem; color: #b3a1d9;">${order.status}</span></td>
+              <td>
+                <div class="action-btn-group">
+                  <button class="btn btn-xs" onclick="viewOrderDetails(${order.orderinfo_id})" title="View Details">View</button>
+                  ${reviewBtn}
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+      } catch (err) {
+        console.error(err);
+        tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red; padding:15px;">Failed to load order history.</td></tr>';
+      }
     }
+
+    // Attach order list loading logic to window reference for consistency
+    window.refreshProfileOrders = () => loadOrderHistory(currentUserId);
   });
 
+  // --- 7. Window Scoped Modal View Handlers ---
+  window.viewOrderDetails = async function(orderId) {
+    const modal = document.getElementById('portalModal');
+    const target = document.getElementById('modalPortalTarget');
+    modal.style.display = 'flex';
+    target.innerHTML = '<p class="muted">Loading complete manifest breakdown...</p>';
+
+    try {
+      // Direct call setup assuming router permissions verify token updates are handled
+      const res = await axios.get(`/api/v1/orders/${orderId}`);
+      const { customer, items } = res.data;
+
+      let layoutItems = items.map(i => `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
+          <span>${i.itemName} <strong>(x${i.qty})</strong></span>
+          <span>₱${parseFloat(i.subTotal).toFixed(2)}</span>
+        </div>
+      `).join('');
+
+      target.innerHTML = `
+        <h3 style="color: var(--accent); margin-top: 0; margin-bottom: 5px;">Order Manifest Details</h3>
+        <p class="muted" style="font-size: 0.8rem; margin-bottom: 15px;">Ref ID: #MPH-${orderId}</p>
+        <div style="border-bottom: 1px solid rgba(168, 107, 255, 0.15); padding-bottom: 10px; margin-bottom: 15px; font-size: 0.85rem;">
+          <strong>Recipient:</strong> ${customer.customerName || 'N/A'}<br>
+          <strong>Destination:</strong> ${customer.shippingAddress || ''}, ${customer.town || ''} ${customer.zipcode || ''}
+        </div>
+        <div style="max-height: 180px; overflow-y: auto; margin-bottom: 15px;">
+          ${layoutItems}
+        </div>
+        <div style="text-align: right;">
+          <a href="/api/v1/orders/${orderId}/receipt/download" class="btn btn-outline" style="padding: 5px 15px; font-size: 0.85rem; text-decoration: none;">Download Official Receipt</a>
+        </div>
+      `;
+    } catch (err) {
+      target.innerHTML = '<p style="color: red;">Failed to retrieve order layout data metrics.</p>';
+    }
+  };
+
   window.openReviewModal = function(orderId) {
-    alert(`Trigger review modal for Order #${orderId}. Build your modal UI here!`);
-  }
+    const modal = document.getElementById('portalModal');
+    const target = document.getElementById('modalPortalTarget');
+    modal.style.display = 'flex';
+
+    target.innerHTML = `
+      <h3 style="color: var(--accent); margin-top: 0; margin-bottom: 5px;">Write a Component Review</h3>
+      <p class="muted" style="font-size: 0.8rem; margin-bottom: 15px;">Submitting experience breakdown for Manifest order item #${orderId}</p>
+      <form id="portalReviewForm">
+        <div style="margin-bottom: 12px;">
+          <label style="display:block; margin-bottom:5px; font-size:0.85rem;">Score Assessment</label>
+          <select id="revScore" style="width:100%; background:#221d30; color:#fff; border:1px solid rgba(168,107,255,0.3); padding:8px; border-radius:4px;">
+            <option value="5">⭐⭐⭐⭐⭐ (5) Outstanding Quality</option>
+            <option value="4">⭐⭐⭐⭐ (4) Good/Reliable</option>
+            <option value="3">⭐⭐⭐ (3) Satisfactory</option>
+            <option value="2">⭐⭐ (2) Subpar Component</option>
+            <option value="1">⭐ (1) Highly Defective</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display:block; margin-bottom:5px; font-size:0.85rem;">Written Review Commentary</label>
+          <textarea id="revComment" rows="4" style="width:100%; background:#221d30; color:#fff; border:1px solid rgba(168,107,255,0.3); padding:8px; border-radius:4px; resize:none;" placeholder="Detail your performance observations regarding this item..."></textarea>
+        </div>
+        <button type="submit" class="btn" style="width:100%;">Post Review Manifest</button>
+      </form>
+    `;
+
+    document.getElementById('portalReviewForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const rating = document.getElementById('revScore').value;
+      const comment = document.getElementById('revComment').value;
+
+      try {
+        // Point to your centralized backend review implementation path configuration endpoint
+      await axios.post('/api/v1/reviews', { orderId, rating, comment });        
+      alert('Review submitted successfully! Thank you for your feedback.');
+        closePortalModal();
+      } catch (err) {
+        alert(err.response?.data?.message || 'Review noted! Check route parameters connection status configurations.');
+        closePortalModal();
+      }
+    };
+  };
+
+  window.closePortalModal = function() {
+    document.getElementById('portalModal').style.display = 'none';
+    document.getElementById('modalPortalTarget').innerHTML = '';
+  };
 </script>
 </body>
 </html>

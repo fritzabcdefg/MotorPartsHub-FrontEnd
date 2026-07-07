@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transactions Demo</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #162033;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #0f766e;
+      --danger: #dc2626;
+      --warning: #f59e0b;
+      --border: #e5e7eb;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef4ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    .hero {
+      background: linear-gradient(120deg, #14213d 0%, #2563eb 100%);
+      color: white;
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 { margin: 0 0 8px; font-size: 28px; }
+    .hero p { margin: 0; max-width: 720px; line-height: 1.6; color: rgba(255,255,255,0.9); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      padding: 16px 18px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+    .stat-card .value { font-size: 24px; font-weight: 700; }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .panel h2 { margin-top: 0; margin-bottom: 14px; font-size: 18px; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .form-group input.field-error, .form-group select.field-error {
+      border-color: #dc2626 !important;
+      box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.15) inset;
+    }
+    .form-error {
+      display: none;
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: #991b1b;
+      font-size: 13px;
+    }
+    button {
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-secondary { background: #e5eefc; color: var(--accent); }
+    .btn-danger { background: #fee2e2; color: var(--danger); }
+
+    .status-pill {
+      display: inline-block;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .status-processing { background: #fef3c7; color: #92400e; }
+    .status-shipped { background: #dbeafe; color: #1d4ed8; }
+    .status-delivered { background: #dcfce7; color: #166534; }
+    .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    th { background: #f9fafb; color: var(--muted); }
+    .empty { color: var(--muted); text-align: center; padding: 24px; }
+
+    .tiny { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+    .pagination {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pagination-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pagination button.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .page-info {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .loading-more {
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      padding: 12px 0;
+    }
+
+    @media (max-width: 900px) {
+      .content-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <h1>Transactions Dashboard Demo</h1>
+      <p>This sample page demonstrates a richer CRUD experience for transaction records. It can work with the live API when you are signed in, and it also falls back to demo data so the UI remains useful for presentation.</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat-card">
+        <div class="label">Total Transactions</div>
+        <div class="value" id="total-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Pending</div>
+        <div class="value" id="pending-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Delivered</div>
+        <div class="value" id="delivered-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Revenue</div>
+        <div class="value" id="revenue-total">₱0.00</div>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <div class="panel">
+        <h2>Create or update a transaction</h2>
+        <form id="transaction-form">
+          <input type="hidden" id="transaction-id" />
+          <div class="form-group">
+            <label for="customer-id">Customer ID</label>
+            <input type="text" id="customer-id" placeholder="Example: 1" />
+          </div>
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status">
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="shipping">Shipping Fee</label>
+            <input type="number" id="shipping" value="200" />
+          </div>
+          <div id="form-error" class="form-error"></div>
+          <div class="btn-row">
+            <button type="submit" class="btn-primary">Save Transaction</button>
+            <button type="button" id="reset-btn" class="btn-secondary">Reset Form</button>
+          </div>
+          <div class="tiny">If you are signed in, the page will use the live API. Otherwise it will stay in demo mode with sample data.</div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="btn-row" style="margin-top: 0; margin-bottom: 14px; justify-content: space-between; align-items: center;">
+          <h2 style="margin: 0;">Recent transactions</h2>
+          <button type="button" id="refresh-btn" class="btn-secondary">Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Amount</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="transaction-list"></tbody>
+        </table>
+        <div id="pagination-controls" class="pagination"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script>
+    const apiBase = '/api/v1/transactions';
+    const token = localStorage.getItem('token') || '';
+    let transactions = [];
+    let currentPage = 1;
+    let pageSize = 4;
+    let isLoadingMore = false;
+
+    const demoTransactions = [
+      { id: 1001, customer_id: 1, customer_name: 'Juan dela Cruz', status: 'Delivered', shipping: 200, amount: 1250, total: 1450, date_placed: '2026-07-05' },
+      { id: 1002, customer_id: 2, customer_name: 'Maria Santos', status: 'Processing', shipping: 200, amount: 890, total: 1090, date_placed: '2026-07-07' },
+      { id: 1003, customer_id: 3, customer_name: 'Rico Gomez', status: 'Shipped', shipping: 200, amount: 2180, total: 2380, date_placed: '2026-07-08' }
+    ];
+
+    function authHeaders() {
+      return token ? { Authorization: 'Bearer ' + token } : {};
+    }
+
+    function formatCurrency(value) {
+      return '₱' + Number(value || 0).toFixed(2);
+    }
+
+    function renderStatus(status) {
+      const normalized = (status || '').toLowerCase();
+      let cls = 'status-processing';
+      if (normalized === 'shipped') cls = 'status-shipped';
+      if (normalized === 'delivered') cls = 'status-delivered';
+      if (normalized === 'cancelled') cls = 'status-cancelled';
+      return '<span class="status-pill ' + cls + '">' + status + '</span>';
+    }
+
+    function renderStats() {
+      const total = transactions.length;
+      const pending = transactions.filter((tx) => (tx.status || '').toLowerCase() === 'processing').length;
+      const delivered = transactions.filter((tx) => (tx.status || '').toLowerCase() === 'delivered').length;
+      const revenue = transactions.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+      $('#total-count').text(total);
+      $('#pending-count').text(pending);
+      $('#delivered-count').text(delivered);
+      $('#revenue-total').text(formatCurrency(revenue));
+    }
+
+    function clearFormErrors() {
+      $('#transaction-form').find('.field-error').removeClass('field-error');
+      $('#form-error').hide().text('');
+    }
+
+    function validateTransactionForm() {
+      clearFormErrors();
+      const customerId = $('#customer-id').val().trim();
+      const shipping = $('#shipping').val().trim();
+      const errors = [];
+
+      if (!customerId) {
+        errors.push('Customer ID is required.');
+        $('#customer-id').addClass('field-error');
+      }
+
+      if (!shipping) {
+        errors.push('Shipping fee is required.');
+        $('#shipping').addClass('field-error');
+      } else if (Number.isNaN(Number(shipping)) || Number(shipping) < 0) {
+        errors.push('Shipping fee must be a valid non-negative number.');
+        $('#shipping').addClass('field-error');
+      }
+
+      if (errors.length) {
+        $('#form-error').text(errors[0]).show();
+        return false;
+      }
+
+      return true;
+    }
+
+    function renderPagination() {
+      const totalPages = Math.max(1, Math.ceil(transactions.length / pageSize));
+      const safePage = Math.min(currentPage, totalPages);
+      const start = (safePage - 1) * pageSize + 1;
+      const end = Math.min(safePage * pageSize, transactions.length);
+      const pageButtons = [];
+
+      pageButtons.push(`<button type="button" class="btn-secondary" data-page="${Math.max(1, safePage - 1)}" ${safePage === 1 ? 'disabled' : ''}>← Prev</button>`);
+      for (let page = 1; page <= totalPages; page += 1) {
+        pageButtons.push(`<button type="button" class="btn-secondary pagination-btn ${page === safePage ? 'active' : ''}" data-page="${page}">${page}</button>`);
+      }
+      pageButtons.push(`<button type="button" class="btn-secondary" data-page="${Math.min(totalPages, safePage + 1)}" ${safePage >= totalPages ? 'disabled' : ''}>Next →</button>`);
+
+      $('#pagination-controls').html(`
+        <div class="page-info">Showing ${transactions.length ? start : 0}-${transactions.length ? end : 0} of ${transactions.length} transactions</div>
+        <div class="pagination-buttons">${pageButtons.join('')}</div>
+      `);
+    }
+
+    function renderTransactions() {
+      renderStats();
+      if (!transactions.length) {
+        $('#transaction-list').html('<tr><td colspan="6" class="empty">No transactions to display yet.</td></tr>');
+        $('#pagination-controls').html('');
+        return;
+      }
+
+      const totalPages = Math.max(1, Math.ceil(transactions.length / pageSize));
+      currentPage = Math.min(currentPage, totalPages);
+      const start = (currentPage - 1) * pageSize;
+      const pageItems = transactions.slice(start, start + pageSize);
+
+      const rows = pageItems.map(function (tx) {
+        return `
+          <tr>
+            <td>#${tx.id}</td>
+            <td>${tx.customer_name || tx.customer_id || 'Unknown'}</td>
+            <td>${renderStatus(tx.status || 'Processing')}</td>
+            <td>${formatCurrency(tx.amount || 0)}</td>
+            <td>${formatCurrency(tx.total || 0)}</td>
+            <td>
+              <button class="btn-secondary edit-btn" data-id="${tx.id}" type="button">Edit</button>
+              <button class="btn-danger delete-btn" data-id="${tx.id}" type="button">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      $('#transaction-list').html(rows);
+      renderPagination();
+    }
+
+    function loadMoreTransactions() {
+      if (isLoadingMore || currentPage >= Math.ceil(transactions.length / pageSize)) {
+        return;
+      }
+
+      isLoadingMore = true;
+      $('#transaction-list').append('<tr><td colspan="6" class="loading-more">Loading more transactions...</td></tr>');
+      setTimeout(function () {
+        currentPage += 1;
+        renderTransactions();
+        isLoadingMore = false;
+      }, 250);
+    }
+
+    function loadTransactions() {
+      currentPage = 1;
+      $.ajax({ url: apiBase, method: 'GET', headers: authHeaders() })
+        .done(function (response) {
+          const rows = response.transactions || [];
+          transactions = rows;
+          renderTransactions();
+        })
+        .fail(function () {
+          transactions = demoTransactions;
+          renderTransactions();
+        });
+    }
+
+    $('#transaction-form').on('submit', function (e) {
+      e.preventDefault();
+      if (!validateTransactionForm()) {
+        return;
+      }
+      const id = $('#transaction-id').val();
+      const payload = {
+        customer_id: $('#customer-id').val(),
+        status: $('#status').val(),
+        shipping: $('#shipping').val()
+      };
+
+      if (!token) {
+        if (id) {
+          transactions = transactions.map(function (tx) {
+            if (String(tx.id) === String(id)) {
+              return { ...tx, ...payload, customer_name: tx.customer_name || 'Demo User', amount: tx.amount || 0, total: Number(tx.amount || 0) + Number(payload.shipping || 0) };
+            }
+            return tx;
+          });
+        } else {
+          const newTx = {
+            id: Date.now(),
+            customer_id: payload.customer_id || 999,
+            customer_name: payload.customer_id ? 'Demo Customer ' + payload.customer_id : 'Demo Customer',
+            status: payload.status || 'Processing',
+            shipping: Number(payload.shipping || 0),
+            amount: 0,
+            total: Number(payload.shipping || 0),
+            date_placed: new Date().toISOString().slice(0, 10)
+          };
+          transactions = [newTx].concat(transactions);
+        }
+        renderTransactions();
+        $('#transaction-form')[0].reset();
+        $('#transaction-id').val('');
+        $('#shipping').val('200');
+        $('#status').val('Processing');
+        return;
+      }
+
+      const request = id
+        ? $.ajax({ url: apiBase + '/' + id, method: 'PUT', headers: authHeaders(), contentType: 'application/json', data: JSON.stringify(payload) })
+        : $.ajax({ url: apiBase, method: 'POST', headers: authHeaders(), contentType: 'application/json', data: JSON.stringify(payload) });
+
+      request.done(function () {
+        $('#transaction-form')[0].reset();
+        $('#transaction-id').val('');
+        $('#shipping').val('200');
+        $('#status').val('Processing');
+        loadTransactions();
+      }).fail(function () {
+        alert('The request could not be completed. Please sign in first or try demo mode.');
+      });
+    });
+
+    $(document).on('click', '.edit-btn', function () {
+      const id = $(this).data('id');
+      const tx = transactions.find(function (item) { return String(item.id) === String(id); });
+      if (!tx) return;
+      $('#transaction-id').val(tx.id);
+      $('#customer-id').val(tx.customer_id || '');
+      $('#status').val(tx.status || 'Processing');
+      $('#shipping').val(tx.shipping || 200);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    $(document).on('click', '.delete-btn', function () {
+      const id = $(this).data('id');
+      if (!confirm('Delete this transaction from the demo list?')) return;
+      if (!token) {
+        transactions = transactions.filter(function (tx) { return String(tx.id) !== String(id); });
+        renderTransactions();
+        return;
+      }
+      $.ajax({ url: apiBase + '/' + id, method: 'DELETE', headers: authHeaders() })
+        .done(function () {
+          loadTransactions();
+        });
+    });
+
+    $('#reset-btn').on('click', function () {
+      $('#transaction-form')[0].reset();
+      clearFormErrors();
+      $('#transaction-id').val('');
+      $('#shipping').val('200');
+      $('#status').val('Processing');
+    });
+
+    $(document).on('click', '.pagination-btn', function () {
+      const page = parseInt($(this).data('page'), 10);
+      if (!page) {
+        return;
+      }
+      currentPage = page;
+      renderTransactions();
+    });
+
+    $(window).on('scroll', function () {
+      const nearBottom = $(window).scrollTop() + $(window).height() >= $(document).height() - 220;
+      if (nearBottom) {
+        loadMoreTransactions();
+      }
+    });
+
+    $('#refresh-btn').on('click', loadTransactions);
+    loadTransactions();
+  </script>
+</body>
+</html>

@@ -21,6 +21,7 @@
     .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; }
     .status-badge.active { background-color: rgba(76, 175, 80, 0.2); color: #4caf50; }
     .status-badge.inactive { background-color: rgba(244, 67, 54, 0.2); color: #f44336; }
+    .load-more-indicator { margin-top: 10px; text-align: center; color: #b3a1d9; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -37,6 +38,10 @@
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
   <script>
+    let usersCache = [];
+    let visibleUserCount = 10;
+    let isLoadingMoreUsers = false;
+
     $(document).ready(function() {
         User.initSession();
         if(!User.isLoggedIn()) { window.location.href = '/login.html'; return; }
@@ -44,14 +49,19 @@
         function loadUsers() {
             const token = User.getToken();
             api.get('/api/v1/users', { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(res => renderTable(res.data.users || res.data || []))
+            .then(res => {
+                usersCache = res.data.users || res.data || [];
+                visibleUserCount = Math.min(10, usersCache.length);
+                renderTable(usersCache);
+            })
             .catch(() => $('#tableContainer').html('<p style="color:red">Failed to load user records.</p>'));
         }
 
         function renderTable(users) {
+            const visibleUsers = users.slice(0, visibleUserCount);
             let html = `<table id="usersTable" class="table">
                 <thead><tr><th>ID</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
-                <tbody>${users.map(u => `
+                <tbody>${visibleUsers.map(u => `
                     <tr>
                         <td>${u.id || u._id}</td><td>${u.email}</td>
                         <td>
@@ -63,8 +73,9 @@
                         <td><span class="status-badge ${u.active !== false ? 'active' : 'inactive'}">${u.active !== false ? 'Active' : 'Inactive'}</span></td>
                         <td>${u.active !== false ? `<button class="btn-deactivate" data-email="${u.email}">Deactivate</button>` : ''}</td>
                     </tr>`).join('')}</tbody></table>`;
-            $('#tableContainer').html(html);
-            $('#usersTable').DataTable({ "destroy": true, "pageLength": 10 });
+            $('#tableContainer').html(html + `${users.length > visibleUserCount ? '<div class="load-more-indicator">Scroll to load more users...</div>' : ''}`);
+            $('#usersTable').DataTable({ "destroy": true, "paging": false, "searching": true, "ordering": true, "info": false });
+            setupInfiniteScroll(users.length);
             
             $('.role-select').change(function() {
                 const token = User.getToken();
@@ -77,6 +88,20 @@
                     const token = User.getToken();
                     api.delete('/api/v1/deactivate', { data: { email: $(this).data('email') }, headers: { 'Authorization': `Bearer ${token}` } })
                     .then(() => { alert('Account Deactivated.'); loadUsers(); });
+                }
+            });
+        }
+
+        function setupInfiniteScroll(totalRows) {
+            $(window).off('scroll.userInfinite');
+            if (totalRows <= visibleUserCount) return;
+            $(window).on('scroll.userInfinite', function () {
+                const distanceFromBottom = $(document).height() - ($(window).scrollTop() + $(window).height());
+                if (distanceFromBottom < 220 && !isLoadingMoreUsers) {
+                    isLoadingMoreUsers = true;
+                    visibleUserCount = Math.min(visibleUserCount + 10, totalRows);
+                    renderTable(usersCache);
+                    setTimeout(function () { isLoadingMoreUsers = false; }, 200);
                 }
             });
         }

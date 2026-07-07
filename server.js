@@ -19,7 +19,7 @@ app.get(/^(?!\/api\/).*/, (req, res) => {
     return res.sendFile(path.join(__dirname, 'public', 'catalog.html'));
   }
 
-  if (requestedPath === '/dashboard' || requestedPath === '/admin/admin/dashboard.html') {
+  if (requestedPath === '/dashboard' || requestedPath === '/admin/dashboard.html') {
     return res.sendFile(path.join(__dirname, 'admin', 'dashboard.html'));
   }
 

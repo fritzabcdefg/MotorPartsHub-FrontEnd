@@ -31,12 +31,15 @@
     .form-grid { display: grid; gap: 12px; margin-top: 12px; }
     .form-grid label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: #cfc2ef; }
     .form-grid input, .form-grid textarea { background: #140d26; border: 1px solid rgba(168,107,255,0.4); color: #fff; padding: 8px; border-radius: 6px; font-size: 14px; }
+    .form-grid input.field-error, .form-grid textarea.field-error { border-color: #ff6b6b !important; box-shadow: 0 0 0 1px rgba(255,107,107,0.18) inset; }
+    .form-error { display: none; margin-top: 10px; padding: 8px 10px; border-radius: 6px; border: 1px solid #ff6b6b; background: rgba(255,107,107,0.12); color: #ffb6b6; font-size: 13px; }
     .form-actions { margin-top: 18px; display: flex; gap: 10px; justify-content: flex-end; }
     .btn-primary { background: #a86bff; border: none; color: #fff; padding: 9px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; }
     .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 9px 18px; border-radius: 6px; cursor: pointer; }
 
     .view-row { margin: 6px 0; }
     .view-row strong { color: #cfc2ef; }
+    .load-more-indicator { margin-top: 10px; text-align: center; color: #b3a1d9; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -68,6 +71,7 @@
             <textarea id="formDescription" rows="4"></textarea>
           </label>
         </div>
+        <div id="formErrorMessage" class="form-error"></div>
         <div class="form-actions">
           <button type="button" id="formCancelBtn" class="btn-secondary">Cancel</button>
           <button type="submit" class="btn-primary">Save Changes</button>
@@ -95,6 +99,8 @@
   <script>
     let categoriesCache = [];
     let editingId = null;
+    let visibleCategoryCount = 10;
+    let isLoadingMoreCategories = false;
 
     $(document).ready(function () {
       User.initSession();
@@ -111,6 +117,7 @@
         .then(res => {
           const data = res.data;
           categoriesCache = Array.isArray(data) ? data : (data.categories || data.rows || []);
+          visibleCategoryCount = Math.min(10, categoriesCache.length);
           renderTable(categoriesCache);
         })
         .catch(() => {
@@ -119,7 +126,8 @@
     }
 
     function renderTable(categories) {
-      const rowsHtml = categories.map(c => `
+      const visibleCategories = categories.slice(0, visibleCategoryCount);
+      const rowsHtml = visibleCategories.map(c => `
         <tr style="${c.is_deleted ? 'opacity:0.55;' : ''}">
           <td>${c.category_id}</td>
           <td><strong>${c.name || 'Unclassified Segment'}</strong>${c.is_deleted ? ' <span style="color:#ff6b6b; font-size:11px; border:1px solid #ff6b6b; padding:1px 6px; border-radius:4px;">Deleted</span>' : ''}</td>
@@ -140,17 +148,34 @@
           <thead><tr><th>Category ID</th><th>Department Name</th><th>Description Summary</th><th>Actions</th></tr></thead>
           <tbody>${rowsHtml || '<tr><td colspan="4">No categories yet. Click "Add Category" to create one.</td></tr>'}</tbody>
         </table>
+        ${categories.length > visibleCategoryCount ? '<div class="load-more-indicator">Scroll to load more categories...</div>' : ''}
       `;
       $('#tableContainer').html(html);
       if ($.fn.DataTable.isDataTable('#categoriesTable')) {
         $('#categoriesTable').DataTable().destroy();
       }
-      $('#categoriesTable').DataTable({ pageLength: 10 });
+      $('#categoriesTable').DataTable({ paging: false, searching: true, ordering: true, info: false });
+      setupInfiniteScroll(categories.length);
+    }
+
+    function setupInfiniteScroll(totalRows) {
+      $(window).off('scroll.categoryInfinite');
+      if (totalRows <= visibleCategoryCount) return;
+      $(window).on('scroll.categoryInfinite', function () {
+        const distanceFromBottom = $(document).height() - ($(window).scrollTop() + $(window).height());
+        if (distanceFromBottom < 220 && !isLoadingMoreCategories) {
+          isLoadingMoreCategories = true;
+          visibleCategoryCount = Math.min(visibleCategoryCount + 10, totalRows);
+          renderTable(categoriesCache);
+          setTimeout(function () { isLoadingMoreCategories = false; }, 200);
+        }
+      });
     }
 
     // ---- Add / Edit form modal ----
     function openFormModal(category) {
       editingId = category ? category.category_id : null;
+      clearFormErrors($('#categoryForm'));
       $('#formModalTitle').text(editingId ? 'Edit Category' : 'Add Category');
       $('#formName').val(category?.name || '');
       $('#formDescription').val(category?.description || '');
@@ -160,7 +185,26 @@
     function closeFormModal() {
       $('#categoryFormOverlay').hide();
       $('#categoryForm')[0].reset();
+      clearFormErrors($('#categoryForm'));
       editingId = null;
+    }
+
+    function clearFormErrors($form) {
+      $form.find('.field-error').removeClass('field-error');
+      $form.find('#formErrorMessage').hide().text('');
+    }
+
+    function validateCategoryForm($form) {
+      clearFormErrors($form);
+      const name = $form.find('#formName').val().trim();
+
+      if (!name) {
+        $form.find('#formName').addClass('field-error');
+        $form.find('#formErrorMessage').text('Category name is required.').show();
+        return false;
+      }
+
+      return true;
     }
 
     function saveCategory() {
@@ -244,6 +288,9 @@
     });
     $(document).on('submit', '#categoryForm', function (e) {
       e.preventDefault();
+      if (!validateCategoryForm($(this))) {
+        return;
+      }
       saveCategory();
     });
 

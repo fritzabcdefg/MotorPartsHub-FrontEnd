@@ -15,6 +15,7 @@
     .table td { padding: 12px !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; }
     .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: #b3a1d9 !important; margin: 12px 0; }
     .dataTables_wrapper .dataTables_filter input, .dataTables_wrapper .dataTables_length select { background-color: #140d26 !important; color: #fff !important; border: 1px solid rgba(168, 107, 255, 0.4) !important; padding: 6px; border-radius: 4px; }
+    .load-more-indicator { margin-top: 10px; text-align: center; color: #b3a1d9; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -31,20 +32,45 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
   <script>
+    let mockReviews = [
+        { id: "1", partName: "Microcontroller Unit", reviewer: "Alex G.", rating: 5, comment: "Works perfectly for embedded projects." },
+        { id: "2", partName: "Brake Pad Kit", reviewer: "Mia P.", rating: 4, comment: "Good quality and easy to install." },
+        { id: "3", partName: "Battery Terminal", reviewer: "Noel R.", rating: 5, comment: "Very durable and reliable." }
+    ];
+    let visibleReviewCount = 10;
+    let isLoadingMoreReviews = false;
+
     $(document).ready(function() {
-        const mockReviews = [
-            { id: "1", partName: "Microcontroller Unit", reviewer: "Alex G.", rating: 5, comment: "Works perfectly for embedded projects." }
-        ];
+        renderReviews();
+    });
+
+    function renderReviews() {
+        const visibleReviews = mockReviews.slice(0, visibleReviewCount);
         let html = `<table id="reviewsTable" class="table">
             <thead><tr><th>Review ID</th><th>Target Product</th><th>Reviewer</th><th>Rating</th><th>Comment Submission</th></tr></thead>
-            <tbody>${mockReviews.map(r => `
+            <tbody>${visibleReviews.map(r => `
                 <tr>
                     <td>#${r.id}</td><td>${r.partName}</td><td>${r.reviewer}</td>
                     <td style="color:#ffca28">${'★'.repeat(r.rating)}</td><td>"${r.comment}"</td>
                 </tr>`).join('')}</tbody></table>`;
-        $('#tableContainer').html(html);
-        $('#reviewsTable').DataTable({ "pageLength": 10 });
-    });
+        $('#tableContainer').html(html + `${mockReviews.length > visibleReviewCount ? '<div class="load-more-indicator">Scroll to load more reviews...</div>' : ''}`);
+        $('#reviewsTable').DataTable({ "paging": false, "searching": true, "ordering": true, "info": false });
+        setupInfiniteScroll();
+    }
+
+    function setupInfiniteScroll() {
+        $(window).off('scroll.reviewInfinite');
+        if (mockReviews.length <= visibleReviewCount) return;
+        $(window).on('scroll.reviewInfinite', function () {
+            const distanceFromBottom = $(document).height() - ($(window).scrollTop() + $(window).height());
+            if (distanceFromBottom < 220 && !isLoadingMoreReviews) {
+                isLoadingMoreReviews = true;
+                visibleReviewCount = Math.min(visibleReviewCount + 10, mockReviews.length);
+                renderReviews();
+                setTimeout(function () { isLoadingMoreReviews = false; }, 200);
+            }
+        });
+    }
   </script>
 </body>
 </html>
