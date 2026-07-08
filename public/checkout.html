@@ -195,6 +195,7 @@
   <script src="/js/header.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/cart.js"></script>
+  <script src="/js/notify.js"></script>
 
   <script>
     // Attach JWT to every axios request
@@ -261,7 +262,7 @@
           const { customerDetails } = res.data;
 
           if (!customerDetails || !customerDetails.fname) {
-            alert('⚠️ Please complete your profile before checking out.');
+            notify('Please complete your profile before checking out.', 'warning'); // CHANGED
             window.location.href = '/profile.html';
             return;
           }
@@ -283,7 +284,7 @@
         })
         .catch(err => {
           console.error('Failed to load shipping info:', err);
-          alert('Session expired. Please log in again.');
+          notify('Session expired. Please log in again.', 'error'); // CHANGED
           window.location.href = '/login.html';
         });
     }
@@ -292,11 +293,11 @@
     document.getElementById('placeOrderBtn').addEventListener('click', async () => {
       const cart = Cart.getCart();
       if (!cart || cart.length === 0) {
-        alert('Your cart is empty.');
+        notify('Your cart is empty.', 'warning'); // CHANGED
         return;
       }
       if (!customerData) {
-        alert('Shipping information not loaded. Please refresh.');
+        notify('Shipping information not loaded. Please refresh.', 'warning'); // CHANGED
         return;
       }
 
@@ -323,11 +324,12 @@
           }));
           // Clear cart after successful order
           Cart.clearCart();
+          notify('Order placed successfully!', 'success'); // ADDED
           // Redirect to success page with order ID
           window.location.href = `/order-success.html?orderId=${res.data.orderId}`;
         }
       } catch (err) {
-        alert(err.response?.data?.message || 'Failed to place order. Please try again.');
+        notify(err.response?.data?.message || 'Failed to place order. Please try again.', 'error'); // CHANGED
         btn.disabled = false;
         btn.textContent = 'Place Order';
       }

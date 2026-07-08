@@ -215,6 +215,9 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+  <!-- Global Notification System — must load before any script that calls notify() -->
+  <script src="/js/notify.js"></script>
+
   <script>
   axios.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
@@ -381,13 +384,13 @@
           });
 
           if (res.data.success) {
-            alert('Profile updated successfully!');
+            notify('Profile updated successfully!', 'success');
             document.getElementById('password').value = '';
             toggleMode(false);
             snapshotFields(); 
           }
         } catch (err) {
-          alert(err.response?.data?.message || 'Failed saving profile data changes.');
+          notify(err.response?.data?.message || 'Failed saving profile data changes.', 'error');
         }
       });
     }
@@ -508,10 +511,10 @@
       try {
         // Point to your centralized backend review implementation path configuration endpoint
       await axios.post('/api/v1/reviews', { orderId, rating, comment });        
-      alert('Review submitted successfully! Thank you for your feedback.');
+      notify('Review submitted successfully! Thank you for your feedback.', 'success');
         closePortalModal();
       } catch (err) {
-        alert(err.response?.data?.message || 'Review noted! Check route parameters connection status configurations.');
+        notify(err.response?.data?.message || 'Review noted! Check route parameters connection status configurations.', 'error');
         closePortalModal();
       }
     };

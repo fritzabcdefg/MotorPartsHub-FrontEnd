@@ -141,6 +141,7 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
+  <script src="/js/notify.js"></script>
   <script>
     let itemsCache = [];
     let categoriesCache = [];
@@ -190,6 +191,7 @@
         })
         .catch(() => {
           $('#tableContainer').html('<p style="color:red">Failed to connect to inventory systems.</p>');
+          notify('Failed to load inventory items.', 'error'); // ADDED
         });
     }
 
@@ -326,6 +328,7 @@
 
       if (errors.length) {
         $form.find('#formErrorMessage').text(errors[0]).show();
+        notify(errors[0], 'warning'); // ADDED — surface validation errors as a toast too
         return false;
       }
 
@@ -354,6 +357,7 @@
 
       const method = editingId ? 'put' : 'post';
       const url = editingId ? `/api/v1/items/${editingId}` : '/api/v1/items';
+      const wasEditing = Boolean(editingId); // CAPTURED before closeFormModal() resets it
 
       // Do NOT set Content-Type manually - the browser needs to add the multipart boundary itself.
       api.request({
@@ -365,9 +369,10 @@
       .then(() => {
         closeFormModal();
         loadItems();
+        notify(wasEditing ? 'Item updated successfully.' : 'Item added successfully.', 'success'); // CHANGED
       })
       .catch(err => {
-        alert('Failed to save item: ' + (err.response?.data?.message || err.message || 'Unknown error'));
+        notify('Failed to save item: ' + (err.response?.data?.message || err.message || 'Unknown error'), 'error'); // CHANGED
       });
     }
 
@@ -395,14 +400,20 @@
 
     function deleteItem(id) {
       api.delete(`/api/v1/items/${id}`, { headers: authHeaders() })
-        .then(() => loadItems())
-        .catch(err => alert('Failed to delete item: ' + (err.response?.data?.message || err.message || 'Unknown error')));
+        .then(() => {
+          loadItems();
+          notify('Item deleted successfully.', 'success'); // CHANGED
+        })
+        .catch(err => notify('Failed to delete item: ' + (err.response?.data?.message || err.message || 'Unknown error'), 'error')); // CHANGED
     }
 
     function restoreItem(id) {
       api.put(`/api/v1/items/${id}/restore`, {}, { headers: authHeaders() })
-        .then(() => loadItems())
-        .catch(err => alert('Failed to restore item: ' + (err.response?.data?.message || err.message || 'Unknown error')));
+        .then(() => {
+          loadItems();
+          notify('Item restored successfully.', 'success'); // CHANGED
+        })
+        .catch(err => notify('Failed to restore item: ' + (err.response?.data?.message || err.message || 'Unknown error'), 'error')); // CHANGED
     }
 
     // ---- Event delegation (elements are re-rendered, so bind on document) ----

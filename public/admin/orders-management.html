@@ -60,6 +60,7 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
+  <script src="/js/notify.js"></script>
 
   <script>
     let ordersCache = [];
@@ -122,8 +123,8 @@
                 const currentOrderId = $(this).data('order-id'); 
 
                 api.put(`/api/v1/orders/${currentOrderId}/status`, { status: selectedStatus }, { headers: { 'Authorization': `Bearer ${token}` } }) 
-                .then(() => alert('Database status field updated successfully.')) 
-                .catch(() => alert('Status modification rejected. Check admin session rules.')); 
+                .then(() => notify('Order status updated successfully.', 'success'))         // CHANGED
+                .catch(() => notify('Failed to update status. Check admin session rules.', 'error')); // CHANGED
             });
 
             // 3. Open Orderline Details Modal on Click Listener 
@@ -183,10 +184,14 @@
                 })
                 .catch(err => {
                     $('#modalBody').html('<p style="color:red">Failed to safely parse corresponding item lines logs.</p>');
+                    notify('Failed to load order details.', 'error'); // ADDED
                 });
             });
         }) 
-        .catch(() => $('#tableContainer').html('<div style="color:red; padding:10px;">Failed to establish connection to XAMPP database transaction logs.</div>')); 
+        .catch(() => {
+            $('#tableContainer').html('<div style="color:red; padding:10px;">Failed to establish connection to XAMPP database transaction logs.</div>');
+            notify('Failed to load orders.', 'error'); // ADDED
+        }); 
 
         function setupInfiniteScroll() {
             $(window).off('scroll.orderInfinite');
@@ -265,8 +270,9 @@
                 downloadAnchor.click();
                 downloadAnchor.remove();
                 window.URL.revokeObjectURL(blobUrl);
+                notify('Receipt downloaded successfully.', 'success'); // ADDED
             })
-            .catch(() => alert('Failed to generate printable PDF copy. Check active session rules.'))
+            .catch(() => notify('Failed to generate PDF receipt. Check active session rules.', 'error')) // CHANGED
             .finally(() => targetBtn.text('📥 PDF Receipt').prop('disabled', false));
         });
     });

@@ -37,6 +37,7 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
+  <script src="/js/notify.js"></script>
   <script>
     let usersCache = [];
     let visibleUserCount = 10;
@@ -54,7 +55,10 @@
                 visibleUserCount = Math.min(10, usersCache.length);
                 renderTable(usersCache);
             })
-            .catch(() => $('#tableContainer').html('<p style="color:red">Failed to load user records.</p>'));
+            .catch(() => {
+                $('#tableContainer').html('<p style="color:red">Failed to load user records.</p>');
+                notify('Failed to load user records.', 'error'); // ADDED
+            });
         }
 
         function renderTable(users) {
@@ -80,14 +84,16 @@
             $('.role-select').change(function() {
                 const token = User.getToken();
                 api.put(`/api/v1/users/${$(this).data('user-id')}/role`, { role: $(this).val() }, { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(() => alert('Role updated setup.')).catch(() => alert('Update failed.'));
+                .then(() => notify('User role updated successfully.', 'success'))   // CHANGED
+                .catch(() => notify('Failed to update user role.', 'error'));       // CHANGED
             });
 
             $('.btn-deactivate').click(function() {
                 if(confirm('Confirm account deactivation?')) {
                     const token = User.getToken();
                     api.delete('/api/v1/deactivate', { data: { email: $(this).data('email') }, headers: { 'Authorization': `Bearer ${token}` } })
-                    .then(() => { alert('Account Deactivated.'); loadUsers(); });
+                    .then(() => { notify('Account deactivated successfully.', 'success'); loadUsers(); }) // CHANGED
+                    .catch(() => notify('Failed to deactivate account.', 'error')); // ADDED — was silently swallowed before
                 }
             });
         }

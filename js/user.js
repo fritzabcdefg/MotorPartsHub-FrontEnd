@@ -3,6 +3,62 @@
     let currentUser = null;
     let currentToken = null;
 
+    // notify() was being called but never defined anywhere, which threw a
+    // ReferenceError and broke the code that runs right after it (like the
+    // login redirect below). Defining a lightweight toast here fixes that;
+    // if a fancier global notify() ever gets loaded elsewhere, this defers to it.
+    function notify(message, type = 'info') {
+        if (typeof window.notify === 'function' && window.notify !== notify) {
+            window.notify(message, type);
+            return;
+        }
+
+        const colors = {
+            success: '#52c456',
+            error: '#ff5252',
+            warning: '#ffb020',
+            info: '#a86bff'
+        };
+        const color = colors[type] || colors.info;
+
+        let container = document.getElementById('mph-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'mph-toast-container';
+            container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+            background:#110724;
+            color:#f1efff;
+            border:1px solid ${color};
+            box-shadow:0 8px 24px rgba(0,0,0,0.5), 0 0 12px ${color}66;
+            padding:12px 18px;
+            border-radius:8px;
+            font-family:'Montserrat', sans-serif;
+            font-size:0.9rem;
+            max-width:320px;
+            opacity:0;
+            transform:translateY(-8px);
+            transition:opacity 0.2s ease, transform 0.2s ease;
+        `;
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        });
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-8px)';
+            setTimeout(() => toast.remove(), 200);
+        }, 3200);
+    }
+
     function clearSession(redirectTo = null) {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
@@ -80,18 +136,20 @@
             const password = $('#password').val();
 
             if (!name || !email || !password) {
-                alert('All fields are required.');
+                notify('All fields are required.', 'warning');
                 return;
             }
 
             register({ name, email, password })
                 .then(function(response) {
-                    alert('Registration successful! Please log in.');
-                    window.location.href = 'login.html';
+                    notify('Registration successful! Please log in.', 'success');
+                    setTimeout(function() {
+                        window.location.href = 'login.html';
+                    }, 1200);
                 })
                 .catch(function(error) {
                     const message = error.response?.data?.message || 'Registration failed.';
-                    alert(message);
+                    notify(message, 'error');
                 });
         });
 
@@ -103,7 +161,7 @@
             const password = $('#password').val();
 
             if (!email || !password) {
-                alert('Email and password are required.');
+                notify('Email and password are required.', 'warning');
                 return;
             }
 
@@ -117,16 +175,18 @@
                         throw new Error('Login response was incomplete.');
                     }
                     setSession(user, token);
-                    alert('Login successful!');
-                    if (user.role === 'admin') {
-                        window.location.href = '/admin/dashboard.html';
-                    } else {
-                        window.location.href = 'home.html';
-                    }
+                    notify('Login successful!', 'success');
+                    setTimeout(function() {
+                        if (user.role === 'admin') {
+                            window.location.href = '/admin/dashboard.html';
+                        } else {
+                            window.location.href = 'home.html';
+                        }
+                    }, 1000);
                 })
                 .catch(function(error) {
                     const message = error.response?.data?.message || error.message || 'Login failed.';
-                    alert(message);
+                    notify(message, 'error');
                 });
         });
     });

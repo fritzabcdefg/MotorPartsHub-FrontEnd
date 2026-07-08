@@ -10,10 +10,44 @@ $(document).ready(function () {
     const $searchInput = $('#partSearch');
     const $results = $('#searchResults');
     let debounceTimer = null;
-    const imageBase = 'http://localhost:4000'; // Adjust port/host to match base configuration
 
     // Note: We removed "const api = window.api;" from here to allow 
     // JavaScript to naturally look up the scope chain for the global 'api' instance.
+
+    // ==========================================
+    // IMAGE URL HELPER
+    // ==========================================
+    // Your frontend and backend run on different origins (api.js points
+    // axios at http://localhost:4000), so item images — which live under
+    // the backend's /uploads folder — must be resolved against THAT origin,
+    // not the page's own origin. We read the same baseURL api.js already
+    // configured, so there's only one place that ever needs to change.
+    function backendBaseUrl() {
+        try {
+            if (typeof api !== 'undefined' && api.defaults && api.defaults.baseURL) return api.defaults.baseURL;
+        } catch (e) { /* api not in scope yet */ }
+        if (window.api && window.api.defaults && window.api.defaults.baseURL) return window.api.defaults.baseURL;
+        return '';
+    }
+
+    function resolveImageUrl(rawPath) {
+        if (!rawPath) return '/img/placeholder-part.png';
+
+        let src = rawPath;
+
+        // Already a full absolute URL — leave it alone.
+        if (src.startsWith('http')) return encodeURI(src);
+
+        // Bare filename with no folder (e.g. from a product_images join) —
+        // assume it lives under /uploads/items/. Otherwise just root it.
+        if (!src.startsWith('/')) {
+            src = src.includes('/') ? `/${src}` : `/uploads/items/${src}`;
+        }
+
+        // Filenames like "Wheel Tire (Diablo Rosso).jpg" contain spaces and
+        // parentheses — encode them so the browser requests the exact file.
+        return encodeURI(`${backendBaseUrl()}${src}`);
+    }
 
     function clearResults() {
         $results.empty();
@@ -109,13 +143,9 @@ $(document).ready(function () {
                     const itemId = item.id || item.item_id;
                     const itemName = item.name || item.description || 'Unnamed Component';
                     const itemPrice = item.sell_price ?? item.price ?? 0;
-                    
-                    // Format image location safely
-                    let imgUrl = item.img_url || item.img_path || '';
-                    if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('/')) {
-                        imgUrl = `${imageBase}/${imgUrl}`;
-                    }
-                    if (!imgUrl) imgUrl = '/img/placeholder-part.png';
+
+                    // Format image location safely (relative, same-origin, URI-encoded)
+                    const imgUrl = resolveImageUrl(item.img_url || item.img_path);
 
                     // Give badges look variations depending on position index loop 
                     const tags = ['Bestseller', 'Hot Drop', 'Premium', 'Top Rated'];
@@ -125,7 +155,7 @@ $(document).ready(function () {
                         <article class="product-display-card">
                           <span class="status-badge active bestseller-drop">${currentTag}</span>
                           <div class="img-container product-card-img-link" data-item-id="${itemId}" style="cursor: pointer;">
-                            <img src="${imgUrl}" alt="${itemName}" class="product-img" loading="lazy">
+                            <img src="${imgUrl}" alt="${itemName}" class="product-img" loading="lazy" onerror="this.onerror=null;this.src='/img/placeholder-part.png';">
                           </div>
                           <div class="product-info">
                             <h3 class="product-card-name" style="margin-bottom: 8px; font-size: 1.1rem; font-weight: 600;">${itemName}</h3>
@@ -174,11 +204,12 @@ $(document).ready(function () {
                     
                     const id = value.item_id || value.id;
                     const desc = value.description || value.name;
+                    const imgUrl = resolveImageUrl(value.img_url || value.img_path);
 
                     const item = $(
                         `<div class="col-md-3 mb-4">
                             <div class="card h-100">
-                                <img src="${imageBase}${value.img_path || ''}" class="card-img-top" alt="${desc}">
+                                <img src="${imgUrl}" class="card-img-top" alt="${desc}" onerror="this.onerror=null;this.src='/img/placeholder-part.png';">
                                 <div class="card-body">
                                     <h5 class="card-title">${desc}</h5>
                                     <p class="card-text">₱ ${value.sell_price}</p>

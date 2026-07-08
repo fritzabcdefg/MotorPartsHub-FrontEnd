@@ -96,6 +96,7 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
+  <script src="/js/notify.js"></script>
   <script>
     let categoriesCache = [];
     let editingId = null;
@@ -122,6 +123,7 @@
         })
         .catch(() => {
           $('#tableContainer').html('<p style="color:red">Failed to synchronize category structure mapping.</p>');
+          notify('Failed to load categories.', 'error'); // ADDED
         });
     }
 
@@ -215,6 +217,7 @@
 
       const method = editingId ? 'put' : 'post';
       const url = editingId ? `/api/v1/categories/${editingId}` : '/api/v1/categories';
+      const wasEditing = Boolean(editingId); // CAPTURED before closeFormModal() resets it
 
       api.request({
         method,
@@ -225,9 +228,10 @@
       .then(() => {
         closeFormModal();
         loadCategories();
+        notify(wasEditing ? 'Category updated successfully.' : 'Category created successfully.', 'success'); // CHANGED
       })
       .catch(err => {
-        alert('Failed to save category: ' + (err.response?.data?.message || err.message || 'Unknown error'));
+        notify('Failed to save category: ' + (err.response?.data?.message || err.message || 'Unknown error'), 'error'); // CHANGED
       });
     }
 
@@ -246,14 +250,20 @@
 
     function deleteCategory(id) {
       api.delete(`/api/v1/categories/${id}`, { headers: authHeaders() })
-        .then(() => loadCategories())
-        .catch(err => alert('Failed to delete category: ' + (err.response?.data?.message || err.message || 'Unknown error')));
+        .then(() => {
+          loadCategories();
+          notify('Category deleted successfully.', 'success'); // CHANGED
+        })
+        .catch(err => notify('Failed to delete category: ' + (err.response?.data?.message || err.message || 'Unknown error'), 'error')); // CHANGED
     }
 
     function restoreCategory(id) {
       api.put(`/api/v1/categories/${id}/restore`, {}, { headers: authHeaders() })
-        .then(() => loadCategories())
-        .catch(err => alert('Failed to restore category: ' + (err.response?.data?.message || err.message || 'Unknown error')));
+        .then(() => {
+          loadCategories();
+          notify('Category restored successfully.', 'success'); // CHANGED
+        })
+        .catch(err => notify('Failed to restore category: ' + (err.response?.data?.message || err.message || 'Unknown error'), 'error')); // CHANGED
     }
 
     // ---- Event delegation ----

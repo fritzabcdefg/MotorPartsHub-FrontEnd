@@ -1,34 +1,130 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Login - MotorPartsHub</title>
   <link rel="stylesheet" href="/css/style.css">
+<style>
+    :root {
+        --bg: #06030a;
+        --card: #110724;
+        --accent: #a86bff;
+        --text: #f1efff;
+    }
+    body {
+        background: linear-gradient(180deg, var(--bg) 0%, #0c0914 100%);
+        color: var(--text);
+        font-family: 'Montserrat', sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+    .form-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        padding: 20px;
+        margin-top: 80px; 
+    }
+    .card {
+        background: var(--card);
+        padding: 40px;
+        border-radius: 16px;
+        border: 1px solid rgba(168, 107, 255, 0.2);
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    h1 { margin-top: 0; font-size: 1.8rem; text-align: center; }
+    label { display: block; margin: 15px 0 5px; color: var(--text); font-size: 0.9rem; }
+    input {
+        width: 100%;
+        padding: 12px;
+        background: #0b0710;
+        border: 1px solid rgba(168, 107, 255, 0.2);
+        border-radius: 8px;
+        color: white;
+        box-sizing: border-box;
+    }
+    
+    /* Password Container Styling */
+    .password-wrapper { position: relative; width: 100%; }
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--accent);
+        opacity: 0.7;
+    }
+    .toggle-password:hover { opacity: 1; }
+
+    input[type="submit"] {
+        background: var(--accent);
+        border: none;
+        color: white;
+        font-weight: bold;
+        margin-top: 25px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    input[type="submit"]:hover { background: #8e58e3; }
+    a { color: var(--accent); text-decoration: none; }
+  </style>
 </head>
 <body>
+
   <div id="header"></div>
+
   <div class="form-container">
-  <main class="card">
-    <h1>Login</h1>
-    <form id="loginForm">
-      <label for="email">Email</label>
-      <input id="email" type="email">
-      <label for="password">Password</label>
-      <input id="password" type="password">
-      <br></br>
-      <input type="submit" value="Login">
-    </form>
-          <br></br>
-    <p>Don't have an account? <a href="register.html">Register here</a>.</p>
-  </main>
+    <main class="card">
+      <h1>Welcome Back</h1>
+      <form id="loginForm">
+        <label for="email">Email</label>
+        <input id="email" type="email" required>
+        
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input id="password" type="password" required>
+          <span class="toggle-password" id="togglePassword">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </span>
+        </div>
+
+        <input type="submit" value="Login">
+      </form>
+      <p style="text-align: center; margin-top: 20px;">
+        Don't have an account? <a href="register.html">Register here</a>.
+      </p>
+    </main>
   </div>
+
+  <div id="footer"></div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/user.js"></script>
+  
   <script>
+    // Toggle Password Visibility Logic
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    togglePassword.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        // Toggle icon color/opacity slightly for feedback
+        this.style.opacity = type === 'password' ? '0.7' : '1';
+    });
+
     fetch('/header-guest.html').then(r=>r.text()).then(t=>{document.getElementById('header').innerHTML=t});
     fetch('/footer.html').then(r => r.text()).then(t => { document.getElementById('footer').innerHTML = t; });
   </script>

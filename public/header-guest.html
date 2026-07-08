@@ -1,9 +1,33 @@
 <nav class="site-header">
-  <div class="site-title">MotorPartsHub</div>
-  <div class="nav-links">
-    <a href="home.html">Home</a>
-    <a href="catalog.html">Parts</a>
-    <a href="cart.html">Cart <span id="itemCount">0</span></a>
-    <a href="login.html">Login</a>
+  <div class="site-title">MotorParts<span>Hub</span></div>
+  
+  <form action="/catalog.html" method="GET" class="header-search-form">
+    <div class="header-search-wrapper">
+      <svg class="header-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="M21 21l-4.35-4.35"></path>
+      </svg>
+      <input type="text" name="search" placeholder="Search parts..." autocomplete="off" class="header-search-input">
+      <button type="submit" class="header-search-btn" title="Execute Search">➔</button>
+    </div>
+  </form>
+  
+  <div class="nav-links" id="mainNav">
+    <a href="/home.html">Home</a>
+    <a href="/catalog.html">Parts</a>
+
+    <a href="/cart.html" id="navCart" class="nav-cart-link">
+      <div class="cart-icon-wrapper">
+        <svg class="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <span id="itemCount" class="cart-badge">0</span>
+      </div>
+      <span class="cart-label">Cart</span>
+    </a>
+
+    <a href="/login.html" id="navAuth" class="nav-auth-link">Login</a>
   </div>
 </nav>

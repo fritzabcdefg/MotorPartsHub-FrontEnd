@@ -9,8 +9,56 @@
         return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    // ==========================================
+    // IMAGE URL HELPER
+    // ==========================================
+    // Your frontend and backend run on different origins (api.js points
+    // axios at http://localhost:4000), so item images — which live under
+    // the backend's /uploads folder — must be resolved against THAT origin,
+    // not the page's own origin. We read the same baseURL api.js already
+    // configured, so there's only one place that ever needs to change.
+    function backendBaseUrl() {
+        try {
+            if (typeof api !== 'undefined' && api.defaults && api.defaults.baseURL) return api.defaults.baseURL;
+        } catch (e) { /* api not in scope yet */ }
+        if (window.api && window.api.defaults && window.api.defaults.baseURL) return window.api.defaults.baseURL;
+        return '';
+    }
+
+    function resolveImageUrl(raw) {
+        if (!raw) return null;
+
+        // Accept plain strings or {url}/{filename} shaped objects.
+        let src = typeof raw === 'string' ? raw : (raw.url || raw.filename || raw.img_path);
+        if (!src) return null;
+
+        // Already a full absolute URL — leave it alone.
+        if (src.startsWith('http')) return encodeURI(src);
+
+        if (!src.startsWith('/')) {
+            // A bare filename (no folder) is a product_images row — those
+            // live under /uploads/items/. Anything else just gets rooted.
+            src = src.includes('/') ? `/${src}` : `/uploads/items/${src}`;
+        }
+
+        // Filenames like "Wheel Tire (Diablo Rosso).jpg" contain spaces and
+        // parentheses — encode so the browser requests the exact file.
+        return encodeURI(`${backendBaseUrl()}${src}`);
+    }
+
     function imgSrc(item) {
-        return item.img_url || (item.images && item.images[0] && item.images[0].url) || '/img/placeholder-part.png';
+        return resolveImageUrl(item.img_url) ||
+               resolveImageUrl(item.img_path) ||
+               resolveImageUrl(item.images && item.images[0]) ||
+               '/img/placeholder-part.png';
+    }
+
+    function galleryFor(item) {
+        if (item.images && item.images.length) {
+            const resolved = item.images.map(resolveImageUrl).filter(Boolean);
+            if (resolved.length) return resolved;
+        }
+        return [imgSrc(item)];
     }
 
     function attachAddToCart(container) {
@@ -111,19 +159,19 @@
         }
 
         const price = item.sell_price ?? item.price ?? 0;
-        const gallery = (item.images && item.images.length ? item.images.map(i => i.url) : [imgSrc(item)]);
+        const gallery = galleryFor(item);
 
         targetBody.innerHTML = `
             <div class="item-detail-card">
                 <div class="item-detail-gallery">
                     <div class="item-detail-main-img">
-                        <img id="modalMainImg" src="${gallery[0]}" alt="${item.name}">
+                        <img id="modalMainImg" src="${gallery[0]}" alt="${item.name}" onerror="this.onerror=null;this.src='/img/placeholder-part.png';">
                     </div>
                     ${gallery.length > 1 ? `
                     <div class="item-detail-thumbs">
                         ${gallery.map((src, i) => `
                             <div class="thumb-wrapper">
-                                <img class="thumb${i === 0 ? ' active' : ''}" data-src="${src}" src="${src}" alt="thumb ${i + 1}">
+                                <img class="thumb${i === 0 ? ' active' : ''}" data-src="${src}" src="${src}" alt="thumb ${i + 1}" onerror="this.onerror=null;this.src='/img/placeholder-part.png';">
                             </div>
                         `).join('')}
                     </div>` : ''}
@@ -311,7 +359,7 @@
             <div class="product-card">
                 <div class="product-card-img-link" data-item-id="${item.id}" role="button" tabindex="0">
                     <div class="product-card-img">
-                        <img src="${imgSrc(item)}" alt="${item.name}" loading="lazy">
+                        <img src="${imgSrc(item)}" alt="${item.name}" loading="lazy" onerror="this.onerror=null;this.src='/img/placeholder-part.png';">
                         ${item.quantity <= 0 ? '<span class="status-badge inactive out-of-stock-flag">Out of Stock</span>' : ''}
                     </div>
                 </div>

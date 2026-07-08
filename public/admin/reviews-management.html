@@ -23,14 +23,12 @@
     <div class="panel-header-row">
       <h2>Customer Feedback & Reviews Evaluation</h2>
         <a href="/admin/dashboard.html" class="btn-back">← Back to Dashboard</a>    </div>
-    <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107; padding: 10px; border-radius: 6px; margin-bottom: 15px; color: #ffc107;">
-      ⚠️ <strong>Backend Notice:</strong> Review feedback endpoints are pending integration. Displaying mock sandbox.
-    </div>
     <div id="tableContainer"></div>
   </main>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="/js/notify.js"></script>
   <script>
     let mockReviews = [
         { id: "1", partName: "Microcontroller Unit", reviewer: "Alex G.", rating: 5, comment: "Works perfectly for embedded projects." },
